@@ -7,6 +7,9 @@ const ListingItem = ({ listing }) => {
   const { release, localImage } = listing
 
   const image = getImage(localImage)
+
+  if (!image) return null
+
   return (
     <div>
       <GatsbyImage
@@ -19,9 +22,9 @@ const ListingItem = ({ listing }) => {
 
 const IndexPage = ({ data }) => {
   return (
-    <div class="grid">
+    <div className="grid ">
       {data.allListing.nodes.map((listing) => (
-        <ListingItem listing={listing} />
+        <ListingItem key={listing.id} listing={listing} />
       ))}
     </div>
   )
@@ -29,7 +32,7 @@ const IndexPage = ({ data }) => {
 
 export const query = graphql`
   {
-    allListing(limit: 20) {
+    allListing {
       nodes {
         id
         release {
