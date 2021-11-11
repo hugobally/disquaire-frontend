@@ -3,13 +3,9 @@ const fs = require('fs')
 const _ = require('lodash')
 
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
-const { list } = require('postcss')
 
-const credentials = JSON.parse(
-  String(fs.readFileSync('plugins/source-plugin-discogs/credentials.json'))
-)
-const DISCOGS_KEY = credentials.DISCOGS_KEY
-const DISCOGS_SECRET = credentials.DISCOGS_SECRET
+const DISCOGS_KEY = process.env.DISCOGS_KEY
+const DISCOGS_SECRET = process.env.DISCOGS_SECRET
 
 const LISTING_NODE_TYPE = 'Listing'
 
