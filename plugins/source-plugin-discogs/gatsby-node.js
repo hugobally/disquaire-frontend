@@ -1,6 +1,9 @@
 const https = require('https')
 const fs = require('fs')
+const _ = require('lodash')
+
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
+const { list } = require('postcss')
 
 const credentials = JSON.parse(
   String(fs.readFileSync('plugins/source-plugin-discogs/credentials.json'))
@@ -22,19 +25,43 @@ exports.sourceNodes = async ({
 
   const data = await fetchInventory()
 
-  data.forEach((listing) =>
-    createNode({
-      ...listing,
-      id: createNodeId(`${LISTING_NODE_TYPE}-${listing.id}`),
-      internal: {
-        type: LISTING_NODE_TYPE,
-        content: JSON.stringify(listing),
-        contentDigest: createContentDigest(listing),
-      },
-      parent: null,
-      children: [],
-    })
-  )
+  const moods = ['atmospheric', 'raw', 'noise', 'classics', 'miscellaneous']
+  const notes = [
+    "Cet album vous ramènera l'être aimé, la gloire et la fortune.",
+    "L'univers entier distillé en 45 minutes de musique, vous finirez scotché au plafond",
+    'Un classique de la musique de chambre enfin réédité',
+    "Ma grand-mère l'écoute tous les jours au petit déjeuner, soyez comme ma grand-mère",
+    "Un chef-d'oeuvre !",
+  ]
+
+  const chunks = _.chunk(data, data.length / moods.length)
+
+  chunks
+    .map((chunk, index) =>
+      chunk.map((listing) => ({ ...listing, mood: moods?.[index] || moods[0] }))
+    )
+    .flat()
+    .map((listing, index) =>
+      index % 5 === 0
+        ? {
+            ...listing,
+            note: notes[Math.floor(Math.random() * notes.length)],
+          }
+        : listing
+    )
+    .forEach((listing) =>
+      createNode({
+        ...listing,
+        id: createNodeId(`${LISTING_NODE_TYPE}-${listing.id}`),
+        internal: {
+          type: LISTING_NODE_TYPE,
+          content: JSON.stringify(listing),
+          contentDigest: createContentDigest(listing),
+        },
+        parent: null,
+        children: [],
+      })
+    )
 }
 
 exports.onCreateNode = async ({
