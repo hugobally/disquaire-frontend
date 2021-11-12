@@ -1,5 +1,5 @@
 const https = require('https')
-const fs = require('fs')
+
 const _ = require('lodash')
 
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
@@ -11,6 +11,8 @@ const LISTING_NODE_TYPE = 'Listing'
 
 // Only create the necessary fields TODO
 // Improve the preprocessing with https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/ TODO
+// For some reason the primary image in the array is not as good as the one on the discogs page of the release TODO
+// Don't create nodes if there's no image, or handle no images
 exports.sourceNodes = async ({
   actions,
   createContentDigest,
@@ -34,7 +36,14 @@ exports.sourceNodes = async ({
 
   chunks
     .map((chunk, index) =>
-      chunk.map((listing) => ({ ...listing, mood: moods?.[index] || moods[0] }))
+      chunk.map((listing) => ({
+        ...listing,
+        mood: moods?.[index] || moods[0],
+        release: {
+          ...listing.release,
+          artistAndTitle: `${listing.release.artist} - ${listing.release.title}`,
+        },
+      }))
     )
     .flat()
     .map((listing, index) =>
@@ -45,7 +54,7 @@ exports.sourceNodes = async ({
           }
         : listing
     )
-    .forEach((listing) =>
+    .forEach((listing) => {
       createNode({
         ...listing,
         id: createNodeId(`${LISTING_NODE_TYPE}-${listing.id}`),
@@ -57,7 +66,7 @@ exports.sourceNodes = async ({
         parent: null,
         children: [],
       })
-    )
+    })
 }
 
 exports.onCreateNode = async ({
@@ -68,7 +77,7 @@ exports.onCreateNode = async ({
   store,
 }) => {
   if (node.internal.type === LISTING_NODE_TYPE) {
-    const imgUrl = node.release?.images[0]?.uri
+    const imgUrl = node.release.images[0]?.uri
 
     if (!imgUrl) return
 
@@ -83,6 +92,8 @@ exports.onCreateNode = async ({
     if (fileNode) {
       createNodeField({ node, name: 'localImage', value: fileNode.id })
     }
+
+    // createNodeField({ node, name: 'slug', value: `${node.release.artist} ${node.release.title}`})
   }
 }
 
