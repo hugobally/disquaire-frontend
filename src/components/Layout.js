@@ -1,5 +1,5 @@
-import { StaticImage } from 'gatsby-plugin-image'
 import * as React from 'react'
+import { StaticImage } from 'gatsby-plugin-image'
 import { Link } from 'gatsby'
 
 const Layout = ({ children }) => {

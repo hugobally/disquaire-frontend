@@ -1,7 +1,7 @@
+import * as React from 'react'
 import { useMemo } from 'react'
 import { GatsbyImage, getImage } from 'gatsby-plugin-image'
 import { Link } from 'gatsby'
-import * as React from 'react'
 
 const ListingGrid = ({ listings }) => {
   const itemsToRender = useMemo(() => {
@@ -56,7 +56,6 @@ const ListingGridItem = ({ listing, image }) => {
         image={image}
         alt={`${release.artist} ${release.description}`}
       />
-      {listing.release.format}
       {note && (
         <div>
           <span className="rounded bg-white h-1/3 p-3 rotate-3 shadow-2xl top-0 transform w-1/2 z-20 absolute">

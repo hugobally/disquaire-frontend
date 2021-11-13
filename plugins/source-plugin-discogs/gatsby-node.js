@@ -28,11 +28,7 @@ exports.sourceNodes = async ({
 
   const moods = ['atmospheric', 'raw', 'noise', 'classics', 'miscellaneous']
   const notes = [
-    "Cet album vous ramènera l'être aimé, la gloire et la fortune.",
-    "L'univers entier distillé en 45 minutes de musique, vous finirez scotché au plafond",
-    'Un classique de la musique de chambre enfin réédité',
-    "Ma grand-mère l'écoute tous les jours au petit déjeuner, soyez comme ma grand-mère",
-    "Un chef-d'oeuvre !",
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
   ]
 
   const chunks = chunk(data, data.length / moods.length)
@@ -80,6 +76,8 @@ exports.sourceNodes = async ({
       },
     })
   })
+
+  const allGenres = uniqBy(listings, ({ mood }) => mood).map(({ mood }) => mood)
 }
 
 exports.onCreateNode = async ({

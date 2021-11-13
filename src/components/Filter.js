@@ -32,7 +32,7 @@ const Filter = ({ filters, setFilters, legend, filterName, values }) => {
   )
 
   return (
-    <fieldset className="py-10 text-4xl">
+    <fieldset className="pt-10 text-4xl">
       <div className="flex flex-row">
         <legend>{legend}</legend>
         <div className="flex flex-grow gap-10 justify-end">{items}</div>
