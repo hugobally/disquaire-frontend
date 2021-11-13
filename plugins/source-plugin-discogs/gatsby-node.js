@@ -1,6 +1,8 @@
 const https = require('https')
 
-const _ = require('lodash')
+const chunk = require('lodash/chunk')
+const uniqBy = require('lodash/uniqBy')
+const {shuffle} = require('lodash/collection')
 
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
@@ -8,6 +10,7 @@ const DISCOGS_KEY = process.env.DISCOGS_KEY
 const DISCOGS_SECRET = process.env.DISCOGS_SECRET
 
 const LISTING_NODE_TYPE = 'Listing'
+const MOOD_NODE_TYPE = 'Mood'
 
 // Only create the necessary fields TODO
 // Improve the preprocessing with https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/ TODO
@@ -32,9 +35,9 @@ exports.sourceNodes = async ({
     "Un chef-d'oeuvre !",
   ]
 
-  const chunks = _.chunk(data, data.length / moods.length)
+  const chunks = chunk(data, data.length / moods.length)
 
-  chunks
+  const listings = chunks
     .map((chunk, index) =>
       chunk.map((listing) => ({
         ...listing,
@@ -54,19 +57,29 @@ exports.sourceNodes = async ({
           }
         : listing
     )
-    .forEach((listing) => {
-      createNode({
-        ...listing,
-        id: createNodeId(`${LISTING_NODE_TYPE}-${listing.id}`),
-        internal: {
-          type: LISTING_NODE_TYPE,
-          content: JSON.stringify(listing),
-          contentDigest: createContentDigest(listing),
-        },
-        parent: null,
-        children: [],
-      })
+
+  listings.forEach((listing) => {
+    createNode({
+      ...listing,
+      id: createNodeId(`${LISTING_NODE_TYPE}-${listing.id}`),
+      internal: {
+        type: LISTING_NODE_TYPE,
+        contentDigest: createContentDigest(listing),
+      },
     })
+  })
+
+  const allMoods = uniqBy(listings, ({ mood }) => mood).map(({ mood }) => mood)
+  allMoods.forEach((mood, index) => {
+    createNode({
+      value: mood,
+      id: createNodeId(`${MOOD_NODE_TYPE}-${index}`),
+      internal: {
+        type: MOOD_NODE_TYPE,
+        contentDigest: createContentDigest(mood),
+      },
+    })
+  })
 }
 
 exports.onCreateNode = async ({
@@ -92,8 +105,6 @@ exports.onCreateNode = async ({
     if (fileNode) {
       createNodeField({ node, name: 'localImage', value: fileNode.id })
     }
-
-    // createNodeField({ node, name: 'slug', value: `${node.release.artist} ${node.release.title}`})
   }
 }
 

@@ -15,6 +15,7 @@
     "clean": "gatsby clean"
   },
   "dependencies": {
+    "@tailwindcss/typography": "^0.4.1",
     "gatsby": "^4.1.0",
     "gatsby-plugin-image": "^2.1.0",
     "gatsby-plugin-sharp": "^4.1.0",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.0",
     "gatsby-plugin-postcss": "^5.1.0",
+    "gatsby-plugin-root-import": "^2.0.8",
     "lodash": "^4.17.21",
     "postcss": "^8.3.11",
     "tailwindcss": "^2.2.19"

@@ -8,6 +8,7 @@ module.exports = {
     title: 'Disquaire',
   },
   plugins: [
+    'gatsby-plugin-root-import',
     'gatsby-plugin-postcss',
     'source-plugin-discogs',
     `gatsby-plugin-image`,
