@@ -8,6 +8,9 @@ export const FORMATS = {
 }
 
 // Handle no or few results TODO
+//
+// Use a Regex to filter entries
+// + exclude terms (CD, LP -> matches vinyl but shouldnt)
 const Filters = ({ data, filters, setFilters }) => {
   return (
     <div className="pb-20">

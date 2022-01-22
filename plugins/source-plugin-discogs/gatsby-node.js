@@ -2,7 +2,6 @@ const https = require('https')
 
 const chunk = require('lodash/chunk')
 const uniqBy = require('lodash/uniqBy')
-const {shuffle} = require('lodash/collection')
 
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
@@ -25,6 +24,8 @@ exports.sourceNodes = async ({
   const { createNode } = actions
 
   const data = await fetchInventory()
+
+  // Hydrate data from JSON
 
   const moods = ['atmospheric', 'raw', 'noise', 'classics', 'miscellaneous']
   const notes = [
@@ -77,7 +78,7 @@ exports.sourceNodes = async ({
     })
   })
 
-  const allGenres = uniqBy(listings, ({ mood }) => mood).map(({ mood }) => mood)
+  // Save nodes to JSON if it does not exist
 }
 
 exports.onCreateNode = async ({
