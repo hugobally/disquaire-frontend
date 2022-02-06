@@ -136,7 +136,7 @@ function fetchInventoryPage(page = 1) {
     const options = {
       hostname: 'api.discogs.com',
       port: 443,
-      path: `/users/Ajna.Records/inventory?page=${page}&per_page=50`,
+      path: `/users/ajnamanagement/inventory?page=${page}&per_page=50`,
       method: 'GET',
       headers: {
         'User-Agent': 'Script for Ajna Records',

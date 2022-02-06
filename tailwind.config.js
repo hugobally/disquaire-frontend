@@ -7,6 +7,9 @@ module.exports = {
         'auto-fit': 'repeat(auto-fit, minmax(200px, 1fr))'
       }
     },
+    fontFamily: {
+
+    }
   },
   variants: {
     extend: {},

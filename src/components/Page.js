@@ -1,11 +1,12 @@
-import * as React from 'react'
-import { StaticImage } from 'gatsby-plugin-image'
+import React, { useState } from 'react'
 import { Link } from 'gatsby'
+import { StaticImage } from 'gatsby-plugin-image'
+import Nav from './Nav'
 
-const Layout = ({ children }) => {
+const Page = ({ children }) => {
   return (
-    <div className="max-w-7xl mx-auto px-10">
-      <header>
+    <div className="sm:max-w-7xl sm:mx-auto sm:px-10">
+      <header className="relative">
         <Link to="/" className="flex place-content-center">
           {/*Import image via a component so the build fails if not found / Or use URL ? TODO*/}
           <StaticImage
@@ -15,10 +16,11 @@ const Layout = ({ children }) => {
             height={200}
           />
         </Link>
+        <Nav />
       </header>
-      {children}
+      <main>{children}</main>
     </div>
   )
 }
 
-export default Layout
+export default Page

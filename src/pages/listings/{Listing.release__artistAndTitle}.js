@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { graphql } from 'gatsby'
-import Layout from 'src/components/Layout'
+import Page from 'src/components/Page'
 import { GatsbyImage, getImage } from 'gatsby-plugin-image'
 
 const Listing = ({ data }) => {
@@ -9,7 +9,7 @@ const Listing = ({ data }) => {
   const image = getImage(localImage)
 
   return (
-    <Layout>
+    <Page>
       <div className="flex flex-col xl:flex-row">
         <div className="flex justify-center p-10 xl:p-20 xl:justify-end xl:w-1/2">
           <div>
@@ -30,7 +30,7 @@ const Listing = ({ data }) => {
           <p>{seller.payment}</p>
         </main>
       </div>
-    </Layout>
+    </Page>
   )
 }
 
