@@ -10,7 +10,7 @@ import Page from '../components/Page'
 const IndexPage = ({ data }) => {
   return (
     <Page>
-      {/*<Listings />*/}
+      <Listings />
     </Page>
   )
 }
