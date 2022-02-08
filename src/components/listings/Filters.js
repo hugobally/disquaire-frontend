@@ -1,4 +1,5 @@
 import * as React from 'react'
+import {useState} from 'react'
 
 export const FORMATS = {
   vinyl: { title: 'Vinyl', match: ['LP', 'EP', '12"'] },
@@ -6,7 +7,7 @@ export const FORMATS = {
   cassette: { title: 'Cassette', match: ['Cass'] },
 }
 
-const Filter = ({ filters, setFilters, legend, filterName, values }) => {
+const Filter = ({ filters, setFilters, legend, filterName, values, mobileCurrentFilterModal, setMobileCurrentFilterModal }) => {
   const currentValue = filters?.[filterName]
 
   const items = [{ title: 'all', value: 'all' }, ...values].map(
@@ -30,7 +31,7 @@ const Filter = ({ filters, setFilters, legend, filterName, values }) => {
           >
             {title}
           </button>
-          <label className="hidden" htmlFor={value}>
+          <label className="sr-only" htmlFor={value}>
             {title}
           </label>
         </div>
@@ -39,17 +40,18 @@ const Filter = ({ filters, setFilters, legend, filterName, values }) => {
   )
 
   return (
-    <fieldset className="pt-10 text-4xl">
+    <fieldset className="text-4xl">
       <div className="flex flex-row">
         <legend
-          className="uppercase"
+          className="relative"
           style={{
             fontFamily: 'Oswald', // TODO clean this up
           }}
         >
           {legend}
+          <button onClick={() => {setMobileCurrentFilterModal()}} className="absolute w-full h-full top-0 left-0 sm:hidden"/>
         </legend>
-        <div className="flex flex-grow gap-10 justify-end">{items}</div>
+        <div className="sr-only flex flex-grow gap-10 justify-end">{items}</div>
       </div>
     </fieldset>
   )
@@ -85,8 +87,10 @@ export const applyFilters = ({ listings, filters }) => {
 // Use a Regex to filter entries
 // + exclude terms (CD, LP -> matches vinyl but shouldnt)
 const Filters = ({ data, filters, setFilters }) => {
+  const [mobileCurrentFilterModal, setMobileCurrentFilterModal] = useState(null)
+
   return (
-    <div className="pb-20 bg-gray-300">
+    <div className="sticky flex flex-row justify-between top-0 my-10 bg-red-500 z-10">
       <Filter
         filterName="mood"
         legend="moods"
@@ -94,8 +98,7 @@ const Filters = ({ data, filters, setFilters }) => {
           title: value,
           value,
         }))}
-        filters={filters}
-        setFilters={setFilters}
+        {...{filters, setFilters, mobileCurrentFilterModal, setMobileCurrentFilterModal }}
       />
       <Filter
         filterName="format"
@@ -110,8 +113,7 @@ const Filters = ({ data, filters, setFilters }) => {
             value: 'other',
           },
         ]}
-        filters={filters}
-        setFilters={setFilters}
+        {...{filters, setFilters, mobileCurrentFilterModal, setMobileCurrentFilterModal }}
       />
     </div>
   )

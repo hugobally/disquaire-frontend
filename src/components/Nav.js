@@ -6,11 +6,11 @@ const Nav = ({}) => {
 
   return (
     <div
-      className="flex flex-col w-full py-2.5
+      className="flex flex-col w-full
         sm:justify-center sm:gap-10 sm:bg-gray-400"
     >
       {/*todo semantics*/}
-      <div className="px-10 my-10">
+      <div className="p-10">
         Ajna records is a record label based in Nantes, France. Here is more
         text about what we do, and you can read this text, or not. I'm not your
         primary caretaker, I can't tell you what to do. Anyway, scroll for more
