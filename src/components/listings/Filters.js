@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {useState} from 'react'
+import { useContext, useState } from 'react'
 
 export const FORMATS = {
   vinyl: { title: 'Vinyl', match: ['LP', 'EP', '12"'] },
@@ -7,41 +7,20 @@ export const FORMATS = {
   cassette: { title: 'Cassette', match: ['Cass'] },
 }
 
-const Filter = ({ filters, setFilters, legend, filterName, values, mobileCurrentFilterModal, setMobileCurrentFilterModal }) => {
+const Filter = ({
+  filters,
+  setFilters,
+  legend,
+  filterName,
+  values,
+  displayedFilterModal,
+  setDisplayedFilterModal,
+}) => {
   const currentValue = filters?.[filterName]
-
-  const items = [{ title: 'all', value: 'all' }, ...values].map(
-    ({ value, title }) => {
-      const highlighted =
-        currentValue === value || (value === 'all' && !currentValue)
-      const classes = highlighted ? 'underline' : ''
-
-      return (
-        <div key={value}>
-          <button
-            className={`${classes} lowercase`}
-            id={value}
-            style={{ fontFamily: 'Oswald' }} // TODO clean this up
-            onClick={() => {
-              setFilters((filters) => ({
-                ...filters,
-                [filterName]: value !== 'all' ? value : null,
-              }))
-            }}
-          >
-            {title}
-          </button>
-          <label className="sr-only" htmlFor={value}>
-            {title}
-          </label>
-        </div>
-      )
-    }
-  )
 
   return (
     <fieldset className="text-4xl">
-      <div className="flex flex-row">
+      <div className="flex flex-col sm:flex-row">
         <legend
           className="relative"
           style={{
@@ -49,9 +28,49 @@ const Filter = ({ filters, setFilters, legend, filterName, values, mobileCurrent
           }}
         >
           {legend}
-          <button onClick={() => {setMobileCurrentFilterModal()}} className="absolute w-full h-full top-0 left-0 sm:hidden"/>
+          <button
+            onClick={() => {
+              setDisplayedFilterModal(
+                displayedFilterModal === filterName ? null : filterName
+              )
+            }}
+            className="absolute top-0 left-0 h-full w-full sm:hidden"
+          />
         </legend>
-        <div className="sr-only flex flex-grow gap-10 justify-end">{items}</div>
+        <div
+          className={`${displayedFilterModal !== filterName ? 'sr-only' : ''} 
+          overflow-scroll h-screen flex flex-col flex-grow justify-end gap-10 sm:not-sr-only`}
+        >
+          {[{ title: 'all', value: 'all' }, ...values, { title: 'test', value: 'test'}, { title: 'test', value: 'test'},{ title: 'test', value: 'test'},{ title: 'test', value: 'test'},{ title: 'test', value: 'test'},{ title: 'test', value: 'test'},].map(
+            ({ value, title }) => {
+              const highlighted =
+                currentValue === value || (value === 'all' && !currentValue)
+              const classes = highlighted ? 'underline' : ''
+
+              return (
+                <div key={value}>
+                  <button
+                    className={`${classes} lowercase`}
+                    id={value}
+                    style={{ fontFamily: 'Oswald' }} // TODO clean this up
+                    onClick={() => {
+                      setFilters((filters) => ({
+                        ...filters,
+                        [filterName]: value !== 'all' ? value : null,
+                      }))
+                      setDisplayedFilterModal(null)
+                    }}
+                  >
+                    {title}
+                  </button>
+                  <label className="sr-only" htmlFor={value}>
+                    {title}
+                  </label>
+                </div>
+              )
+            }
+          )}
+        </div>
       </div>
     </fieldset>
   )
@@ -87,10 +106,10 @@ export const applyFilters = ({ listings, filters }) => {
 // Use a Regex to filter entries
 // + exclude terms (CD, LP -> matches vinyl but shouldnt)
 const Filters = ({ data, filters, setFilters }) => {
-  const [mobileCurrentFilterModal, setMobileCurrentFilterModal] = useState(null)
+  const [displayedFilterModal, setDisplayedFilterModal] = useState()
 
   return (
-    <div className="sticky flex flex-row justify-between top-0 my-10 bg-red-500 z-10">
+    <div className="sticky top-0 z-10 my-10 flex flex-row justify-between bg-red-500">
       <Filter
         filterName="mood"
         legend="moods"
@@ -98,7 +117,12 @@ const Filters = ({ data, filters, setFilters }) => {
           title: value,
           value,
         }))}
-        {...{filters, setFilters, mobileCurrentFilterModal, setMobileCurrentFilterModal }}
+        {...{
+          filters,
+          setFilters,
+          displayedFilterModal,
+          setDisplayedFilterModal,
+        }}
       />
       <Filter
         filterName="format"
@@ -113,7 +137,12 @@ const Filters = ({ data, filters, setFilters }) => {
             value: 'other',
           },
         ]}
-        {...{filters, setFilters, mobileCurrentFilterModal, setMobileCurrentFilterModal }}
+        {...{
+          filters,
+          setFilters,
+          displayedFilterModal,
+          setDisplayedFilterModal,
+        }}
       />
     </div>
   )
