@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useMemo, useState } from 'react'
 import { graphql, Link } from 'gatsby'
 import { StaticImage } from 'gatsby-plugin-image'
-import Nav from '../components/Nav'
+import Header from '../components/Header'
 import Listings from '../components/listings/Listings'
 import Page from '../components/Page'
 

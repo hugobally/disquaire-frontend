@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { useContext, useState } from 'react'
+import { useState } from 'react'
+import classNames from 'classnames'
 
 export const FORMATS = {
   vinyl: { title: 'Vinyl', match: ['LP', 'EP', '12"'] },
@@ -13,21 +14,26 @@ const Filter = ({
   legend,
   filterName,
   values,
+  color,
   displayedFilterModal,
   setDisplayedFilterModal,
 }) => {
   const currentValue = filters?.[filterName]
 
   return (
-    <fieldset className="text-4xl">
-      <div className="flex flex-col sm:flex-row">
+    <fieldset
+      className={classNames('text-2xl flex-1', {
+        'sr-only': displayedFilterModal && filterName !== displayedFilterModal,
+      })}
+    >
+      <div className={`flex flex-col sm:flex-row ${color} rounded-b-lg`}>
         <legend
-          className="relative"
+          className="relative p-2"
           style={{
             fontFamily: 'Oswald', // TODO clean this up
           }}
         >
-          {legend}
+          {legend}{`➜${currentValue || 'all'}`}
           <button
             onClick={() => {
               setDisplayedFilterModal(
@@ -38,17 +44,22 @@ const Filter = ({
           />
         </legend>
         <div
-          className={`${displayedFilterModal !== filterName ? 'sr-only' : ''} 
-          overflow-scroll h-screen flex flex-col flex-grow justify-end gap-10 sm:not-sr-only`}
+          className={classNames(
+            'flex flex-col sm:not-sr-only sm:flex-grow sm:justify-end sm:gap-10',
+            {
+              'h-screen': filterName === displayedFilterModal,
+              'sr-only': filterName !== displayedFilterModal,
+            }
+          )}
         >
-          {[{ title: 'all', value: 'all' }, ...values, { title: 'test', value: 'test'}, { title: 'test', value: 'test'},{ title: 'test', value: 'test'},{ title: 'test', value: 'test'},{ title: 'test', value: 'test'},{ title: 'test', value: 'test'},].map(
+          {[{ title: 'all', value: 'all' }, ...values].map(
             ({ value, title }) => {
               const highlighted =
                 currentValue === value || (value === 'all' && !currentValue)
               const classes = highlighted ? 'underline' : ''
 
               return (
-                <div key={value}>
+                <div key={value} className="p-2 bg-black text-white">
                   <button
                     className={`${classes} lowercase`}
                     id={value}
@@ -109,41 +120,55 @@ const Filters = ({ data, filters, setFilters }) => {
   const [displayedFilterModal, setDisplayedFilterModal] = useState()
 
   return (
-    <div className="sticky top-0 z-10 my-10 flex flex-row justify-between bg-red-500">
-      <Filter
-        filterName="mood"
-        legend="moods"
-        values={data.allMood.nodes.map(({ value }) => ({
-          title: value,
-          value,
-        }))}
-        {...{
-          filters,
-          setFilters,
-          displayedFilterModal,
-          setDisplayedFilterModal,
-        }}
-      />
-      <Filter
-        filterName="format"
-        legend="formats"
-        values={[
-          ...Object.entries(FORMATS).map(([value, { title }]) => ({
-            title,
+    <div
+      className={classNames('top-0 z-10 w-full', {
+        'fixed overflow-scroll overscroll-contain': displayedFilterModal,
+        'sticky': !displayedFilterModal,
+      })}
+    >
+      <div
+        className={classNames('flex', {
+          'align-start flex-col overflow-scroll overscroll-contain': displayedFilterModal,
+          'flex-row items-center sm:justify-between': !displayedFilterModal,
+        })}
+      >
+        <Filter
+          filterName="mood"
+          legend="mood"
+          values={data.allMood.nodes.map(({ value }) => ({
+            title: value,
             value,
-          })),
-          {
-            title: 'other',
-            value: 'other',
-          },
-        ]}
-        {...{
-          filters,
-          setFilters,
-          displayedFilterModal,
-          setDisplayedFilterModal,
-        }}
-      />
+          }))}
+          color="bg-black text-white"
+          {...{
+            filters,
+            setFilters,
+            displayedFilterModal,
+            setDisplayedFilterModal,
+          }}
+        />
+        <Filter
+          filterName="format"
+          legend="format"
+          values={[
+            ...Object.entries(FORMATS).map(([value, { title }]) => ({
+              title,
+              value,
+            })),
+            {
+              title: 'other',
+              value: 'other',
+            },
+          ]}
+          color="bg-black text-white"
+          {...{
+            filters,
+            setFilters,
+            displayedFilterModal,
+            setDisplayedFilterModal,
+          }}
+        />
+      </div>
     </div>
   )
 }

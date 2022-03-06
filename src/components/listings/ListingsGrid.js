@@ -87,7 +87,7 @@ const ListingsGrid = ({ listings }) => {
 
   return (
     <div
-      className="grid grid-cols-2 auto-rows-fr grid-flow-row-dense place-items-center gap-2 px-2
+      className="grid grid-cols-2 auto-rows-fr grid-flow-row-dense place-items-center gap-2 px-2 pt-10
           sm:grid-cols-auto-fit sm:auto-rows-auto sm:gap-10 sm:px-0"
     >
       {itemsToRender}

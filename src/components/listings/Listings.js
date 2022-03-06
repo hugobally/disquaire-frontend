@@ -51,10 +51,11 @@ const Listings = () => {
   )
 
   return (
-    <div>
+    <>
+      <div className="w-full text-5xl text-center p-2 bg-black text-white">▼   SHOP   ▼</div>
       <Filters {...{ data, filters, setFilters }} />
       <ListingsGrid listings={listings} filters={filters} />
-    </div>
+    </>
   )
 }
 

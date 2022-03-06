@@ -4,17 +4,15 @@ module.exports = {
   theme: {
     extend: {
       gridTemplateColumns: {
-        'auto-fit': 'repeat(auto-fit, minmax(200px, 1fr))'
-      }
+        'auto-fit': 'repeat(auto-fit, minmax(200px, 1fr))',
+      },
     },
     fontFamily: {
-
-    }
+      'sans': ['Oswald'],
+    },
   },
   variants: {
     extend: {},
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-  ],
+  plugins: [require('@tailwindcss/typography')],
 }
