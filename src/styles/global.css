@@ -10,4 +10,7 @@
   /*#gatsby-focus-wrapper {*/
   /*  height: 100%;*/
   /*}*/
+    body {
+        background-color: #111111;
+    }
 }

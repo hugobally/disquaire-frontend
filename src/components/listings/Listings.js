@@ -52,8 +52,10 @@ const Listings = () => {
 
   return (
     <>
-      <div className="w-full text-5xl text-center p-2 bg-black text-white">▼   SHOP   ▼</div>
-      <Filters {...{ data, filters, setFilters }} />
+      <div className="bg-black">
+        <div className="w-full text-5xl text-center p-2 bg-white rounded-t-full h-50vw p-20">THE DISTRO</div>
+      </div>
+      {/*<Filters {...{ data, filters, setFilters }} />*/}
       <ListingsGrid listings={listings} filters={filters} />
     </>
   )

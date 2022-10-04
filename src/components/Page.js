@@ -5,7 +5,7 @@ const Page = ({ children }) => {
   return (
     <div className="sm:max-w-7xl sm:mx-auto sm:px-10">
       <Header/>
-      <main>{children}</main>
+      <main className="bg-white">{children}</main>
     </div>
   )
 }

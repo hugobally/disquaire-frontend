@@ -4,7 +4,6 @@ import Page from 'src/components/Page'
 import { GatsbyImage, getImage } from 'gatsby-plugin-image'
 
 const Listing = ({ data }) => {
-  console.log(data)
   const { localImage, release, note, seller, price } = data.listing
   const image = getImage(localImage)
 

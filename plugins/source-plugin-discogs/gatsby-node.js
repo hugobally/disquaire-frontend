@@ -21,6 +21,8 @@ exports.sourceNodes = async ({
   createNodeId,
   // getNodesByType,
 }) => {
+  if (!DISCOGS_KEY) { throw new Error('Add DISCOGS_KEY and DISCOGS_SECRET to .env(.development|production)') }
+
   const { createNode } = actions
 
   const data = await fetchInventory()
@@ -46,14 +48,14 @@ exports.sourceNodes = async ({
       }))
     )
     .flat()
-    .map((listing, index) =>
-      index % 5 === 0
-        ? {
-            ...listing,
-            note: notes[Math.floor(Math.random() * notes.length)],
-          }
-        : listing
-    )
+    .map((listing, index) => ({ ...listing, note: '' }))
+      // for dev
+      // index % 5 === 0
+      //   ? {
+      //       ...listing,
+      //       note: notes[Math.floor(Math.random() * notes.length)],
+      //     }
+      //    : listing )
 
   listings.forEach((listing) => {
     createNode({
