@@ -21,8 +21,8 @@ const Header = ({}) => {
     return (
         <header>
             <nav>
-                <div className="bg-white rounded-b-full">
-                    <Link to="/" className="flex place-content-center ">
+                <div className="bg-white rounded-b-full sm:bg-black sm:mt-10">
+                    <Link to="/" className="flex place-content-center">
                         {/*Import image via a component so the build fails if not found / Or use URL ? TODO*/}
                         <StaticImage
                             src="../images/ajna-records-logo-500x500.svg"
@@ -30,6 +30,7 @@ const Header = ({}) => {
                             width={200}
                             height={200}
                             placeholder="tracedSVG"
+                            className="sm:bg-white sm:rounded-full"
                         />
                     </Link>
                 </div>

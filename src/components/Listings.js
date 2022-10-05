@@ -1,7 +1,65 @@
-import * as React from 'react'
-import { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
+import Filters, { applyFilters } from './Filters'
+import { graphql, useStaticQuery, Link } from 'gatsby'
 import { GatsbyImage, getImage, StaticImage } from 'gatsby-plugin-image'
-import { Link } from 'gatsby'
+
+const Listings = () => {
+  const [filters, setFilters] = useState()
+
+  // Load big size only for oversized images TODO
+  const data = useStaticQuery(
+    graphql`
+      {
+        allListing(sort: { order: DESC, fields: posted }) {
+          nodes {
+            id
+            release {
+              artist
+              title
+              format
+            }
+            note
+            mood
+            localImage {
+              childImageSharp {
+                gatsbyImageData(
+                  width: 450
+                  height: 450
+                  placeholder: BLURRED
+                  formats: [AUTO, WEBP, AVIF]
+                )
+              }
+            }
+            listingPath: gatsbyPath(
+              filePath: "/listings/{Listing.release__artistAndTitle}"
+            )
+          }
+        }
+
+        allMood {
+          nodes {
+            value
+          }
+        }
+      }
+    `
+  )
+
+  const listings = useMemo(
+    () => applyFilters({ listings: data.allListing.nodes, filters }),
+    [filters, data]
+  )
+
+  return (
+    <>
+      <div>
+        <div className="w-full text-5xl text-center p-2 bg-white rounded-t-full h-50vw pt-14 sm:h-auto sm:p-10 sm:rounded-t-lg">THE DISTRO</div>
+      </div>
+      {/*<Filters {...{ data, filters, setFilters }} />*/}
+      <ListingsGrid listings={listings} filters={filters} />
+    </>
+  )
+}
 
 const ListingsGrid = ({ listings }) => {
     const itemsToRender = useMemo(() => {
@@ -56,8 +114,8 @@ const ListingsGrid = ({ listings }) => {
 
     return (
         <div
-            className="sm:grid sm:grid-cols-2 sm:auto-rows-fr sm:grid-flow-row-dense sm:place-items-center sm:gap-2 px-4
-          sm:grid-cols-auto-fit sm:auto-rows-auto sm:gap-10 sm:px-0"
+            className="sm:grid sm:grid-cols-2 sm:auto-rows-fr sm:grid-flow-row-dense sm:place-items-center sm:gap-2
+          sm:grid-cols-auto-fit sm:auto-rows-auto sm:gap-10 px-4 sm:px-10 bg-white"
         >
             {itemsToRender}
         </div>
@@ -65,32 +123,32 @@ const ListingsGrid = ({ listings }) => {
 }
 
 const ListingsGridItem = ({ listing, image }) => {
-  const { note, listingPath, release } = listing
+    const { note, listingPath, release } = listing
 
-  return (
-    <article
-      className={`mt-4 sm:mt-0 sm:transform sm:transition sm:hover:scale-110
+    return (
+        <article
+            className={`mt-4 sm:mt-0 sm:transform sm:transition sm:hover:scale-110
       ${
-        note ? 'row-span-2 col-span-2 h-full w-full flex flex-col relative sm:justify-center sm:items-center' : ''
-      } `}
-    >
-      <div className={`${note ? 'mx-auto w-2/3 sm:w-auto' : ''}`}>
-        <Link to={listingPath}>
-        <GatsbyImage
-          image={image}
-          alt={`${release.artist} ${release.description}`}
-        />
-        </Link>
-      </div>
-      {note && (
-        <div>
+                note ? 'row-span-2 col-span-2 h-full w-full flex flex-col relative sm:justify-center sm:items-center' : ''
+            } `}
+        >
+            <div className={`${note ? 'mx-auto w-2/3 sm:w-auto' : ''}`}>
+                <Link to={listingPath}>
+                    <GatsbyImage
+                        image={image}
+                        alt={`${release.artist} ${release.description}`}
+                    />
+                </Link>
+            </div>
+            {note && (
+                <div>
           <span className="sm:rounded sm:bg-white sm:h-1/3 sm:p-3 sm:rotate-3 sm:shadow-2xl sm:top-0 sm:transform sm:w-1/2 sm:z-20 sm:absolute">
             {note}
           </span>
-        </div>
-      )}
-    </article>
-  )
+                </div>
+            )}
+        </article>
+    )
 }
 
 // <div className="absolute top-0 grid w-60 rotate-3 shadow-lg">
@@ -115,4 +173,4 @@ const ListingsGridItem = ({ listing, image }) => {
 //     {note}
 //   </div>
 
-export default ListingsGrid
+export default Listings
