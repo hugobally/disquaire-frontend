@@ -161,7 +161,7 @@ export const applyFilters = ({ listings, filters }) => {
     .flat()
 
   return listings.filter((listing) => {
-    if (filters.mood && listing.mood !== filters.mood) return false
+    if (filters.mood && !listing.moods?.includes(filters.mood)) return false
     if (filters.format) {
       if (filters.format === 'other') {
         return !allFormatsMatcher.some((string) =>

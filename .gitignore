@@ -2,4 +2,6 @@ node_modules/
 .cache/
 public
 .idea
-.env.*
+.env
+.env.production
+.env.development
