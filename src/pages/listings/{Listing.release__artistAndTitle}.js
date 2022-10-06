@@ -2,32 +2,41 @@ import * as React from 'react'
 import { graphql } from 'gatsby'
 import Page from 'src/components/Page'
 import { GatsbyImage, getImage } from 'gatsby-plugin-image'
+import {useEffect, useRef} from "react";
 
 const Listing = ({ data }) => {
   const { localImage, release, note, seller, price } = data.listing
   const image = getImage(localImage)
 
+  const listingRef = useRef(null)
+
+  useEffect(() => {
+    listingRef.current.scrollIntoView()
+  }, [])
+
   return (
     <Page>
-      <div className="flex flex-col xl:flex-row">
-        <div className="flex justify-center p-10 xl:p-20 xl:justify-end xl:w-1/2">
-          <div>
-            <GatsbyImage
-              image={image}
-              alt={`${release.artist} ${release.description}`}
-              width={450}
-              height={450}
-            />
+      <div className="bg-white rounded-t-2xl min-h-screen" ref={listingRef}>
+        <div className="flex flex-col xl:flex-row">
+          <div className="flex justify-center p-10 xl:w-1/2 xl:justify-end xl:p-20">
+            <div>
+              <GatsbyImage
+                  image={image}
+                  alt={`${release.artist} ${release.description}`}
+                  width={450}
+                  height={450}
+              />
+            </div>
+          </div>
+          <div className="prose prose-sm flex flex-col px-10 sm:prose lg:prose-lg xl:prose-xl xl:w-1/2 xl:p-20">
+            <h2>{release.title}</h2>
+            <h3>{release.artist}</h3>
+            <span>Price: {price.value} €</span>
+            <span>Format: {release.format}</span>
+            <p>{seller.shipping}</p>
+            <p>{seller.payment}</p>
           </div>
         </div>
-        <main className="flex flex-col prose prose-sm sm:prose lg:prose-lg xl:prose-xl px-10 xl:p-20 xl:w-1/2">
-          <h2>{release.title}</h2>
-          <h3>{release.artist}</h3>
-          <span>Price: {price.value} €</span>
-          <span>Format: {release.format}</span>
-          <p>{seller.shipping}</p>
-          <p>{seller.payment}</p>
-        </main>
       </div>
     </Page>
   )
