@@ -15,12 +15,17 @@ export const FORMATS = {
 const Filters = ({ data, filters, setFilters }) => {
   const [mobileModal, setMobileModal] = useState()
 
+  const moods = data.allMood.nodes
+
   return (
     <div
-      className={classNames('top-0 z-10 m-3 sm:w-auto sm:mx-10 sm:mt-24 sm:border-black sm:border-2', {
-        sticky: !mobileModal,
-        'fixed overflow-scroll overscroll-contain': mobileModal,
-      })}
+      className={classNames(
+        'top-0 z-10 m-3 sm:mx-10 sm:mt-24 sm:w-auto sm:border-2 sm:border-black',
+        {
+          sticky: !mobileModal,
+          'fixed overflow-scroll overscroll-contain': mobileModal,
+        }
+      )}
     >
       <div
         className={classNames('flex', {
@@ -29,20 +34,22 @@ const Filters = ({ data, filters, setFilters }) => {
             mobileModal,
         })}
       >
-        <Filter
-          filterName="mood"
-          legend="mood"
-          values={data.allMood.nodes.map(({ value }) => ({
-            title: value,
-            value,
-          }))}
-          {...{
-            filters,
-            setFilters,
-            mobileModal,
-            setMobileModal,
-          }}
-        />
+        {moods.length > 2 && (
+          <Filter
+            filterName="mood"
+            legend="mood"
+            values={moods.map(({ value }) => ({
+              title: value,
+              value,
+            }))}
+            {...{
+              filters,
+              setFilters,
+              mobileModal,
+              setMobileModal,
+            }}
+          />
+        )}
         <Filter
           filterName="format"
           legend="format"
@@ -82,9 +89,9 @@ const Filter = ({
   return (
     <div
       className={classNames(
-        `flex-1 sm:w-full
-              bg-black sm:bg-white
-              text-3xl 
+        `flex-1 bg-black
+              text-3xl sm:w-full
+              sm:bg-white 
         `,
         {
           'sr-only': mobileModal && filterName !== mobileModal,
@@ -102,16 +109,14 @@ const Filter = ({
           {/*{`➜${currentValue || 'all'}`}*/}
           <button
             onClick={() => {
-              setMobileModal(
-                mobileModal === filterName ? null : filterName
-              )
+              setMobileModal(mobileModal === filterName ? null : filterName)
             }}
             className="absolute top-0 left-0 h-full w-full sm:hidden"
           />
         </legend>
         <div
           className={classNames(
-            'flex flex-col sm:flex-row sm:not-sr-only sm:flex-grow sm:justify-end sm:gap-1',
+            'flex flex-col sm:not-sr-only sm:flex-grow sm:flex-row sm:justify-end sm:gap-1',
             {
               'h-screen': filterName === mobileModal,
               'sr-only': filterName !== mobileModal,
@@ -125,7 +130,10 @@ const Filter = ({
               const classes = highlighted ? 'underline' : ''
 
               return (
-                <div key={value} className="p-2 bg-black text-white sm:bg-white sm:text-black">
+                <div
+                  key={value}
+                  className="bg-black p-2 text-white sm:bg-white sm:text-black"
+                >
                   <button
                     className={`${classes} lowercase`}
                     id={value}

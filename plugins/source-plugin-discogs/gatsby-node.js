@@ -1,4 +1,5 @@
 const https = require('https')
+const http = require('http')
 const qs = require('qs')
 const uniq = require('lodash/uniq')
 
@@ -13,15 +14,12 @@ const {
   CMS_API_TOKEN,
 } = process.env
 
-const LISTING_NODE_TYPE = 'Listing'
-const MOOD_NODE_TYPE = 'Mood'
-
 // Only create the necessary fields TODO
 // Improve the preprocessing with https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/ TODO
 // For some reason the primary image in the array is not as good as the one on the discogs page of the release TODO
 // Check the robustness of the build in case of request failures TODO
 exports.sourceNodes = async ({
-  actions,
+  actions: { createNode },
   createContentDigest,
   createNodeId,
 }) => {
@@ -37,17 +35,12 @@ exports.sourceNodes = async ({
     )
   }
 
-  const { createNode } = actions
+  console.log('-- DISCOGS PLUGIN -- Starting')
 
-  console.log('-- DISCOGS PLUGIN -- Starting source and transform nodes')
-  const listingsFromDiscogs = await fetchDiscogsListings()
-  console.log(
-    `-- DISCOGS PLUGIN -- Fetched ${listingsFromDiscogs.length} listings from Discogs`
+  const listingsFromDiscogs = (await fetchDiscogsListings()).filter(
+    ({ release }) => Boolean(release.images[0]?.uri)
   )
   const listingsFromCMS = await fetchCMSListings()
-  console.log(
-    `-- DISCOGS PLUGIN -- Fetched ${listingsFromCMS.length} listings from CMS`
-  )
 
   const populatedListings = listingsFromCMS.map(
     ({
@@ -68,7 +61,7 @@ exports.sourceNodes = async ({
     }
   )
 
-  const nodesToCreate = populatedListings.concat(
+  const listingsToCreate = populatedListings.concat(
     listingsFromDiscogs.filter(
       ({ id }) =>
         !populatedListings.some(
@@ -77,25 +70,49 @@ exports.sourceNodes = async ({
     )
   )
 
-  nodesToCreate.forEach((listing) => {
-    createNode({
-      ...listing,
-      id: createNodeId(`${LISTING_NODE_TYPE}-${listing.id}`),
-      internal: {
-        type: LISTING_NODE_TYPE,
-        contentDigest: createContentDigest(listing),
+  listingsToCreate
+    .map((listing) => ({
+      id: listing.id,
+      release: {
+        artist: listing.release.artist,
+        title: listing.release.title,
+        artistAndTitle: `${listing.release.artist} - ${listing.release.title}`,
+        format: listing.release.format,
+        description: listing.release.description,
+        imageUrl: listing.release.images[0].uri,
       },
+      note: listing.note,
+      moods: listing.moods,
+      price: {
+        value: listing.price.value,
+      },
+      condition: listing.condition,
+      comments: listing.comments,
+      seller: {
+        shipping: listing.seller.shipping,
+        payment: listing.seller.payment,
+      },
+      posted: listing.posted,
+    }))
+    .forEach((listing) => {
+      createNode({
+        ...listing,
+        id: createNodeId(`Listing-${listing.id}`),
+        internal: {
+          type: 'Listing',
+          contentDigest: createContentDigest(listing),
+        },
+      })
     })
-  })
 
-  const allMoods = uniq(populatedListings.map(({ moods }) => moods).flat())
+  const moods = uniq(populatedListings.map(({ moods }) => moods).flat())
 
-  allMoods.forEach((mood) => {
+  moods.forEach((mood) => {
     createNode({
       value: mood,
-      id: createNodeId(`${MOOD_NODE_TYPE}-${mood}`),
+      id: createNodeId(`Mood-${mood}`),
       internal: {
-        type: MOOD_NODE_TYPE,
+        type: 'Mood',
         contentDigest: createContentDigest(mood),
       },
     })
@@ -111,11 +128,9 @@ exports.onCreateNode = async ({
   cache,
   store,
 }) => {
-  if (node.internal.type === LISTING_NODE_TYPE) {
-    const imgUrl = node.release.images[0]?.uri
-
+  if (node.internal.type === 'Listing') {
     const fileNode = await createRemoteFileNode({
-      url: imgUrl,
+      url: node.release.imageUrl,
       parentNodeId: node.id,
       createNode,
       createNodeId,
@@ -134,24 +149,27 @@ exports.createSchemaCustomization = ({ actions }) => {
   createTypes(`
     type Listing implements Node {
       localImage: File @link(from: "fields.localImage")
+      
+      note: String
+      moods: [String!]
+    }
+    
+    type Mood implements Node {
+      value: String!
     }
   `)
 }
 
 async function fetchDiscogsListings() {
-  const allPages = await fetchAllPages(fetchDiscogsInventoryPage)
-
-  return allPages
+  const allPages = (await fetchAllPages(fetchDiscogsInventoryPage))
     .map((page) => page.listings)
     .flat()
-    .filter(({ release }) => Boolean(release.images[0]?.uri))
-    .map((listing) => ({
-      ...listing,
-      release: {
-        ...listing.release,
-        artistAndTitle: `${listing.release.artist} - ${listing.release.title}`,
-      },
-    }))
+
+  console.log(
+    `-- DISCOGS PLUGIN -- Fetched ${allPages.length} listings from Discogs`
+  )
+
+  return allPages
 }
 
 function fetchDiscogsInventoryPage(page = 1) {
@@ -180,14 +198,23 @@ function fetchDiscogsInventoryPage(page = 1) {
 }
 
 async function fetchCMSListings() {
-  const allPages = await fetchAllPages(
-    fetchCMSPage('listings', { fields: ['discogs_listing_id', 'note'] })
+  const allPages = (
+    await fetchAllPages(
+      fetchCMSPage('listings', { fields: ['discogs_listing_id', 'note'] })
+    )
   )
-
-  return allPages
     .map(({ data }) => data)
     .flat()
-    .filter(({ attributes: { moods, note } }) => moods.data.length || note)
+
+  const filtered = allPages.filter(
+    ({ attributes: { moods, note } }) => moods.data.length || note
+  )
+
+  console.log(
+    `-- DISCOGS PLUGIN -- Fetched ${allPages.length} listings from CMS (${allPages.length - filtered.length} filtered out)`
+  )
+
+  return filtered
 }
 
 const fetchCMSPage =
@@ -213,19 +240,23 @@ const fetchCMSPage =
       port: CMS_PORT,
       path: `/api/${endpoint}?${query}`,
       method: 'GET',
-      headers: {
+      headers: process.env.NODE_ENV !== 'development' ? {
         Authorization: `bearer ${CMS_API_TOKEN}`,
-      },
+      } : {},
     }
 
-    return performRequest(options, (response) => {
-      const responseFromJSON = JSON.parse(response)
+    return performRequest(
+      options,
+      (response) => {
+        const responseFromJSON = JSON.parse(response)
 
-      return {
-        ...responseFromJSON,
-        numPages: responseFromJSON.meta.pagination.pageCount,
-      }
-    })
+        return {
+          ...responseFromJSON,
+          numPages: responseFromJSON.meta.pagination.pageCount,
+        }
+      },
+      process.env.NODE_ENV !== 'development'
+    )
   }
 
 async function fetchAllPages(fetchOnePage) {
@@ -240,9 +271,9 @@ async function fetchAllPages(fetchOnePage) {
   return [firstPage, ...extraPages]
 }
 
-function performRequest(options, responseParser) {
+function performRequest(options, responseParser, ssl = true) {
   return new Promise((resolve, reject) => {
-    const req = https.request(options, (res) => {
+    const req = (ssl ? https : http).request(options, (res) => {
       let response = ''
 
       res.on('data', (d) => {
