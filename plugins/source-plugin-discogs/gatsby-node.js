@@ -7,8 +7,14 @@ const uniq = require('lodash/uniq')
 
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
-const { DISCOGS_KEY, DISCOGS_SECRET, DISCOGS_USERNAME, CMS_URL, CMS_PORT } =
-  process.env
+const {
+  DISCOGS_KEY,
+  DISCOGS_SECRET,
+  DISCOGS_USERNAME,
+  CMS_HOSTNAME,
+  CMS_PORT,
+  CMS_API_TOKEN,
+} = process.env
 
 const LISTING_NODE_TYPE = 'Listing'
 const MOOD_NODE_TYPE = 'Mood'
@@ -21,9 +27,15 @@ exports.sourceNodes = async ({
   createContentDigest,
   createNodeId,
 }) => {
-  if (!DISCOGS_KEY || !DISCOGS_SECRET || !DISCOGS_USERNAME) {
+  if (
+    !DISCOGS_KEY ||
+    !DISCOGS_SECRET ||
+    !DISCOGS_USERNAME ||
+    !CMS_HOSTNAME ||
+    !CMS_API_TOKEN
+  ) {
     throw new Error(
-      'Missing environment variables when reading ./.env, check .env.example for more info'
+      'Missing environment variables, check .env.example for more info'
     )
   }
 
@@ -162,19 +174,14 @@ function fetchDiscogsInventoryPage(page = 1) {
 }
 
 async function fetchCMSListings() {
-  try {
-    const allPages = await fetchAllPages(
-        fetchCMSPage('listings', { fields: ['discogs_listing_id', 'note'] })
-    )
+  const allPages = await fetchAllPages(
+      fetchCMSPage('listings', { fields: ['discogs_listing_id', 'note'] })
+  )
 
-    return allPages
-        .map(({ data }) => data)
-        .flat()
-        .filter(({ attributes: { moods, note } }) => moods.data.length || note)
-  } catch {
-    console.log('-DISCOGS PLUGIN- Failed to fetch listings from CMS')
-    return []
-  }
+  return allPages
+      .map(({ data }) => data)
+      .flat()
+      .filter(({ attributes: { moods, note } }) => moods.data.length || note)
 }
 
 const fetchCMSPage =
@@ -195,13 +202,16 @@ const fetchCMSPage =
       }
     )
 
-    console.log(`${CMS_URL}:${CMS_PORT}/api/${endpoint}?${query}`)
+    console.log(`${CMS_HOSTNAME}:${CMS_PORT}/api/${endpoint}?${query}`)
 
     const options = {
-      hostname: CMS_URL,
+      hostname: CMS_HOSTNAME,
       port: CMS_PORT,
       path: `/api/${endpoint}?${query}`,
       method: 'GET',
+      headers: {
+        Authorization: `bearer ${CMS_API_TOKEN}`,
+      },
     }
 
     return performRequest(
