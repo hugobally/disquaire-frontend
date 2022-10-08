@@ -4,15 +4,14 @@ import { Link } from 'gatsby'
 import { StaticImage } from 'gatsby-plugin-image'
 
 const ContentDrawer = ({ title, children, style }) => {
-  const [showContent, setShowContent] = useState(false)
+  const [showContent, setShowContent] = useState(true)
 
   return (
     <li className={`${style || ''}`}>
-      {/*TODO Semantics*/}
-      <button onClick={() => setShowContent(!showContent)} className="w-full">
-        <h1 className="mt-6 block py-2.5 pl-2 text-3xl">{title}</h1>
-      </button>
-      {children}
+      {/*<button onClick={() => setShowContent(!showContent)} className="w-full">*/}
+      <h1 className="mt-6 block py-2.5 pl-2 text-3xl">{title}</h1>
+      {/*</button>*/}
+      {showContent && children}
     </li>
   )
 }
@@ -30,7 +29,7 @@ const Header = ({}) => {
               width={200}
               height={200}
               placeholder="tracedSVG"
-              className="sm:rounded-full sm:bg-white"
+              className="sm:rounded-full sm:bg-white sm:border-white sm:border-8"
             />
           </Link>
         </div>
@@ -42,18 +41,12 @@ const Header = ({}) => {
           Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
           dolore eu fugiat nulla pariatur.
         </p>
-        <ContentDrawer title="CONTACT US" style="bg-black text-white">
-          <p className="mb-2">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat.
-          </p>
-          <p>
-            Duis aute irure dolor in reprehenderit in voluptate velit esse
-            cillum dolore eu fugiat nulla pariatur.
-          </p>
-        </ContentDrawer>
+        {/*<ContentDrawer title="CONTACT" style="bg-black text-white">*/}
+        {/*  <p>*/}
+        {/*    Duis aute irure dolor in reprehenderit in voluptate velit esse*/}
+        {/*    cillum dolore eu fugiat nulla pariatur.*/}
+        {/*  </p>*/}
+        {/*</ContentDrawer>*/}
         {/*<ContentDrawer title="BANDS" style="bg-black text-white mb-6">*/}
         {/*  <p>Meshuggah</p>*/}
         {/*  <p>Pomme</p>*/}

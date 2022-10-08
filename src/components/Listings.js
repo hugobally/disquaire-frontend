@@ -8,40 +8,40 @@ const Listings = () => {
 
   // Load big size only for oversized images TODO
   const data = useStaticQuery(graphql`
-      {
-        allListing(sort: { order: DESC, fields: posted }) {
-          nodes {
-            id
-            release {
-              artist
-              title
-              format
-            }
-            note
-            moods
-            localImage {
-              childImageSharp {
-                gatsbyImageData(
-                  width: 450
-                  height: 450
-                  placeholder: BLURRED
-                  formats: [AUTO, WEBP, AVIF]
-                )
-              }
-            }
-            listingPath: gatsbyPath(
-              filePath: "/listings/{Listing.release__artistAndTitle}"
-            )
+    {
+      allListing(sort: { order: DESC, fields: posted }) {
+        nodes {
+          id
+          release {
+            artist
+            title
+            format
           }
-        }
-
-        allMood {
-          nodes {
-            value
+          note
+          moods
+          localImage {
+            childImageSharp {
+              gatsbyImageData(
+                width: 450
+                height: 450
+                placeholder: BLURRED
+                formats: [AUTO, WEBP, AVIF]
+              )
+            }
           }
+          listingPath: gatsbyPath(
+            filePath: "/listings/{Listing.release__artistAndTitle}"
+          )
         }
       }
-    `)
+
+      allMood {
+        nodes {
+          value
+        }
+      }
+    }
+  `)
 
   const listings = useMemo(
     () => applyFilters({ listings: data.allListing.nodes, filters }),
@@ -52,16 +52,10 @@ const Listings = () => {
     <>
       <div className="rounded-t-full bg-white">
         <div
-          className="h-50vw w-full rounded-t-full p-2 pt-14 text-center text-5xl
-                        sm:h-auto sm:px-10 sm:pt-32"
+          className="w-full p-2 pt-14 text-center text-5xl
+                        sm:h-auto sm:px-10 "
         >
-          BANDS
-        </div>
-        <div
-          className="w-full rounded-t-full p-2 pt-14 text-center text-5xl
-                        sm:h-auto sm:px-10 sm:pt-32"
-        >
-          THE DISTRO
+          SHOP
         </div>
         <Filters {...{ data, filters, setFilters }} />
         <ListingsGrid listings={listings} className="mt-10 min-h-screen" />
@@ -152,11 +146,11 @@ const ListingsGridItem = ({ listing, image }) => {
         </Link>
       </div>
       {note && (
-        <div>
-          <span className="sm:absolute sm:top-0 sm:z-20 sm:h-1/3 sm:w-1/2 sm:rotate-3 sm:transform sm:rounded sm:bg-white sm:p-3 sm:shadow-2xl">
+        <Link to={`${listingPath}?from_grid=true`}>
+          <span className="sm:absolute sm:top-0 sm:z-20 sm:h-1/3 sm:w-1/2 sm:rotate-3 sm:transform sm:rounded sm:bg-black sm:bg-opacity-95 sm:p-3 sm:text-white sm:shadow-2xl">
             {note}
           </span>
-        </div>
+        </Link>
       )}
     </article>
   )

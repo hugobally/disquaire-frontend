@@ -20,7 +20,7 @@ const Filters = ({ data, filters, setFilters }) => {
   return (
     <div
       className={classNames(
-        'top-0 z-10 m-3 sm:mx-10 sm:mt-24 sm:w-auto sm:border-2 sm:border-black',
+        'top-2 z-10 m-3 sm:mx-10 sm:mt-10 sm:w-auto sm:border-2 sm:border-black',
         {
           sticky: !mobileModal,
           'fixed overflow-scroll overscroll-contain': mobileModal,
@@ -34,7 +34,7 @@ const Filters = ({ data, filters, setFilters }) => {
             mobileModal,
         })}
       >
-        {moods.length > 2 && (
+        {moods.length > 1 && (
           <Filter
             filterName="mood"
             legend="mood"
