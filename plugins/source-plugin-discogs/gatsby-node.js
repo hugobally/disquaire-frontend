@@ -1,8 +1,5 @@
-const http = require('http')
 const https = require('https')
 const qs = require('qs')
-
-const chunk = require('lodash/chunk')
 const uniq = require('lodash/uniq')
 
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
@@ -22,6 +19,7 @@ const MOOD_NODE_TYPE = 'Mood'
 // Only create the necessary fields TODO
 // Improve the preprocessing with https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/ TODO
 // For some reason the primary image in the array is not as good as the one on the discogs page of the release TODO
+// Check the robustness of the build in case of request failures TODO
 exports.sourceNodes = async ({
   actions,
   createContentDigest,
@@ -41,8 +39,15 @@ exports.sourceNodes = async ({
 
   const { createNode } = actions
 
+  console.log('-- DISCOGS PLUGIN -- Starting source and transform nodes')
   const listingsFromDiscogs = await fetchDiscogsListings()
+  console.log(
+    `-- DISCOGS PLUGIN -- Fetched ${listingsFromDiscogs.length} listings from Discogs`
+  )
   const listingsFromCMS = await fetchCMSListings()
+  console.log(
+    `-- DISCOGS PLUGIN -- Fetched ${listingsFromCMS.length} listings from CMS`
+  )
 
   const populatedListings = listingsFromCMS.map(
     ({
@@ -95,6 +100,8 @@ exports.sourceNodes = async ({
       },
     })
   })
+
+  console.log(`-- DISCOGS PLUGIN -- All done`)
 }
 
 exports.onCreateNode = async ({
@@ -131,7 +138,6 @@ exports.createSchemaCustomization = ({ actions }) => {
   `)
 }
 
-// Not robust in case of request failure TODO
 async function fetchDiscogsListings() {
   const allPages = await fetchAllPages(fetchDiscogsInventoryPage)
 
@@ -175,13 +181,13 @@ function fetchDiscogsInventoryPage(page = 1) {
 
 async function fetchCMSListings() {
   const allPages = await fetchAllPages(
-      fetchCMSPage('listings', { fields: ['discogs_listing_id', 'note'] })
+    fetchCMSPage('listings', { fields: ['discogs_listing_id', 'note'] })
   )
 
   return allPages
-      .map(({ data }) => data)
-      .flat()
-      .filter(({ attributes: { moods, note } }) => moods.data.length || note)
+    .map(({ data }) => data)
+    .flat()
+    .filter(({ attributes: { moods, note } }) => moods.data.length || note)
 }
 
 const fetchCMSPage =
@@ -198,11 +204,9 @@ const fetchCMSPage =
         ...params,
       },
       {
-        encodeValuesOnly: true, // prettify URL
+        encodeValuesOnly: true,
       }
     )
-
-    console.log(`${CMS_HOSTNAME}:${CMS_PORT}/api/${endpoint}?${query}`)
 
     const options = {
       hostname: CMS_HOSTNAME,
@@ -214,18 +218,14 @@ const fetchCMSPage =
       },
     }
 
-    return performRequest(
-      options,
-      (response) => {
-        const responseFromJSON = JSON.parse(response)
+    return performRequest(options, (response) => {
+      const responseFromJSON = JSON.parse(response)
 
-        return {
-          ...responseFromJSON,
-          numPages: responseFromJSON.meta.pagination.pageCount,
-        }
-      },
-      false
-    )
+      return {
+        ...responseFromJSON,
+        numPages: responseFromJSON.meta.pagination.pageCount,
+      }
+    })
   }
 
 async function fetchAllPages(fetchOnePage) {
@@ -240,9 +240,9 @@ async function fetchAllPages(fetchOnePage) {
   return [firstPage, ...extraPages]
 }
 
-function performRequest(options, responseParser, ssl = false) {
+function performRequest(options, responseParser) {
   return new Promise((resolve, reject) => {
-    const req = (ssl ? https : http).request(options, (res) => {
+    const req = https.request(options, (res) => {
       let response = ''
 
       res.on('data', (d) => {
