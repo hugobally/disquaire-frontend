@@ -162,14 +162,19 @@ function fetchDiscogsInventoryPage(page = 1) {
 }
 
 async function fetchCMSListings() {
-  const allPages = await fetchAllPages(
-    fetchCMSPage('listings', { fields: ['discogs_listing_id', 'note'] })
-  )
+  try {
+    const allPages = await fetchAllPages(
+        fetchCMSPage('listings', { fields: ['discogs_listing_id', 'note'] })
+    )
 
-  return allPages
-    .map(({ data }) => data)
-    .flat()
-    .filter(({ attributes: { moods, note } }) => moods.data.length || note)
+    return allPages
+        .map(({ data }) => data)
+        .flat()
+        .filter(({ attributes: { moods, note } }) => moods.data.length || note)
+  } catch {
+    console.log('-DISCOGS PLUGIN- Failed to fetch listings from CMS')
+    return []
+  }
 }
 
 const fetchCMSPage =
