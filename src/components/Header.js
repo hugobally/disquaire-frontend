@@ -2,7 +2,6 @@ import * as React from 'react'
 import { useMemo, useState } from 'react'
 import { graphql, Link, useStaticQuery } from 'gatsby'
 import { StaticImage } from 'gatsby-plugin-image'
-import * as DOMPurify from 'dompurify'
 
 const ContentDrawer = ({ title, children, className }) => {
   const [showContent, setShowContent] = useState(true)
@@ -39,17 +38,17 @@ const Header = () => {
     <header>
       <nav>
         <div className="flex place-content-center rounded-b-full bg-white sm:mt-10 sm:bg-black">
-            <Link to="/">
-              {/*Import image via a component so the build fails if not found / Or use URL ? TODO*/}
-              <StaticImage
-                src="../images/ajna-records-logo-500x500.svg"
-                alt="Ajna Records"
-                width={200}
-                height={200}
-                placeholder="tracedSVG"
-                className="sm:rounded-full sm:border-8 sm:border-white sm:bg-white"
-              />
-            </Link>
+          <Link to="/">
+            {/*Import image via a component so the build fails if not found / Or use URL ? TODO*/}
+            <StaticImage
+              src="../images/ajna-records-logo-500x500.svg"
+              alt="Ajna Records"
+              width={200}
+              height={200}
+              placeholder="tracedSVG"
+              className="sm:rounded-full sm:border-8 sm:border-white sm:bg-white"
+            />
+          </Link>
         </div>
       </nav>
 
@@ -57,7 +56,7 @@ const Header = () => {
         <p
           className="bg-black p-6 text-center text-white"
           dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(introTextHTML),
+            __html: introTextHTML,
           }}
         ></p>
         {/*<ContentDrawer title="Contact">*/}

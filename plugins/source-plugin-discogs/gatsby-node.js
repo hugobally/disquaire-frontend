@@ -4,6 +4,7 @@ const qs = require('qs')
 const uniq = require('lodash/uniq')
 const showdown = require('showdown'),
   markdownConverter = new showdown.Converter()
+const DOMPurify = require('isomorphic-dompurify')
 
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
@@ -237,7 +238,7 @@ async function fetchCMSSingleTypes() {
   return {
     introText: introText.error
       ? 'Replace this using the Introduction Text field of the CMS. (Don\'t forget to publish !)'
-      : markdownConverter.makeHtml(introText.data.attributes.content),
+      : DOMPurify.sanitize(markdownConverter.makeHtml(introText.data.attributes.content)),
   }
 }
 

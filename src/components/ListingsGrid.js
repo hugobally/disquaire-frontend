@@ -8,7 +8,7 @@ const ListingsGrid = ({ listings }) => {
     listings.forEach((listing) => (listing.picked = false))
 
     const initialIntervals = [
-      3, 4, 3, 5, 4, 3, 4, 5, 3, 3, 5, 5, 5, 5, 4, 5, 5, 5, 3, 3, 5, 3, 3, 3, 4,
+      7, 1, 2, 3, 5, 3, 4, 4, 5, 3, 3, 5, 5, 5, 5, 4, 5, 5, 5, 3, 3, 5, 3, 3, 3, 4,
       5, 3, 5, 5, 5, 3, 4, 5, 3, 3, 3, 5, 3, 3, 5, 5, 3, 3, 3, 3, 5, 3, 4, 3, 5,
     ]
     let intervals = [...initialIntervals]
