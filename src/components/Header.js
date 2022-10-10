@@ -2,6 +2,8 @@ import * as React from 'react'
 import { useMemo, useState } from 'react'
 import { graphql, Link, useStaticQuery } from 'gatsby'
 import { StaticImage } from 'gatsby-plugin-image'
+import Bands from './Bands'
+import classNames from 'classnames'
 
 const ContentDrawer = ({ title, children, className }) => {
   const [showContent, setShowContent] = useState(true)
@@ -35,9 +37,14 @@ const Header = () => {
   )
 
   return (
-    <header>
+    <>
       <nav>
-        <div className="flex place-content-center rounded-b-full bg-white sm:mt-10 sm:bg-black">
+        <div
+          className={classNames(
+            'flex place-content-center rounded-b-full',
+            // 'bg-white sm:mt-10 sm:bg-black'
+          )}
+        >
           <Link to="/">
             {/*Import image via a component so the build fails if not found / Or use URL ? TODO*/}
             <StaticImage
@@ -51,22 +58,15 @@ const Header = () => {
           </Link>
         </div>
       </nav>
-
-      <ul className="flex w-full flex-col p-4 sm:justify-center">
+      <header className="flex w-full flex-col mt-5 mb-10 p-10 sm:justify-center rounded-3xl shadow">
         <p
-          className="bg-black p-6 text-center text-white"
+          className="text-center text-3xl"
           dangerouslySetInnerHTML={{
             __html: introTextHTML,
           }}
         ></p>
-        {/*<ContentDrawer title="Contact">*/}
-        {/*  <p>*/}
-        {/*    Duis aute irure dolor in reprehenderit in voluptate velit esse*/}
-        {/*    cillum dolore eu fugiat nulla pariatur.*/}
-        {/*  </p>*/}
-        {/*</ContentDrawer>*/}
-      </ul>
-    </header>
+      </header>
+    </>
   )
 }
 

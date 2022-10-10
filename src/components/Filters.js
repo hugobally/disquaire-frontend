@@ -112,7 +112,7 @@ const Filter = ({
   return (
     <div
       className={classNames(
-        `flex-1 rounded-lg bg-black text-base sm:bg-white sm:shadow-inner `,
+        `flex-1 rounded-lg bg-black text-base sm:bg-white sm:shadow-inner sm:text-lg`,
         {
           'sr-only': mobileModal && filterName !== mobileModal,
         }

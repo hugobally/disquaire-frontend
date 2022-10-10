@@ -25,8 +25,8 @@ const Listings = () => {
           localImage {
             childImageSharp {
               gatsbyImageData(
-                width: 450
-                height: 450
+                width: 600
+                height: 600
                 placeholder: BLURRED
                 formats: [AUTO, WEBP, AVIF]
               )
@@ -54,7 +54,7 @@ const Listings = () => {
 
   return (
     <>
-      <div className="bg-gray-100 shadow-inner rounded-md">
+      <div className="bg-gray-50 shadow-inner rounded-3xl sm:pb-10">
         <div
           className="w-full p-2 pt-14 text-center text-5xl
                         sm:h-auto sm:px-10"

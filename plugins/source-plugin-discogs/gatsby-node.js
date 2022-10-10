@@ -1,12 +1,15 @@
 const https = require('https')
 const http = require('http')
 const qs = require('qs')
-const uniq = require('lodash/uniq')
+
 const showdown = require('showdown'),
   markdownConverter = new showdown.Converter()
 const DOMPurify = require('isomorphic-dompurify')
 
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
+
+const uniq = require('lodash/uniq')
+const { uniqBy } = require('lodash')
 
 const {
   DISCOGS_KEY,
@@ -41,29 +44,39 @@ exports.sourceNodes = async ({
 
   console.log('-- DISCOGS AND CMS PLUGIN -- Starting')
 
-  const listingsFromDiscogs = (await fetchDiscogsListings()).filter(
-    ({ release }) => Boolean(release.images[0]?.uri)
+  const listingsFromDiscogs = uniqBy(
+    await fetchDiscogsListings(),
+    (listing) => listing.release.id
+  ).filter(({ release }) => Boolean(release.images[0]?.uri))
+
+  console.log(
+    `-- DISCOGS AND CMS PLUGIN -- ${listingsFromDiscogs.length} Discogs listings after filters`
   )
+
   const listingsFromCMS = await fetchCMSListings()
 
-  const populatedListings = listingsFromCMS.map(
-    ({
-      attributes: {
-        discogs_listing_id,
-        moods: { data: moods },
-        note,
-      },
-    }) => {
-      const matchingDiscogsListing = listingsFromDiscogs.find(
-        ({ id }) => id === Number(discogs_listing_id)
-      )
-      return {
-        ...matchingDiscogsListing,
-        moods: moods.map((mood) => mood.attributes.name),
-        note: markdownConverter.makeHtml(note),
+  const populatedListings = listingsFromCMS
+    .map(
+      ({
+        attributes: {
+          discogs_listing_id,
+          moods: { data: moods },
+          note,
+        },
+      }) => {
+        const matchingDiscogsListing = listingsFromDiscogs.find(
+          ({ id }) => id === Number(discogs_listing_id)
+        )
+        if (!matchingDiscogsListing) return null
+
+        return {
+          ...matchingDiscogsListing,
+          moods: moods.map((mood) => mood.attributes.name),
+          note: parseMarkdown(note),
+        }
       }
-    }
-  )
+    )
+    .filter((listing) => Boolean(listing))
 
   const listingsToCreate = populatedListings.concat(
     listingsFromDiscogs.filter(
@@ -74,13 +87,17 @@ exports.sourceNodes = async ({
     )
   )
 
+  const formatArtistName = (artist) => artist.replaceAll(/\s*\(\d+\)/g, '')
+
   listingsToCreate
     .map((listing) => ({
       id: listing.id,
       release: {
-        artist: listing.release.artist,
+        artist: formatArtistName(listing.release.artist),
         title: listing.release.title,
-        artistAndTitle: `${listing.release.artist} - ${listing.release.title}`,
+        artistAndTitle: `${formatArtistName(listing.release.artist)} - ${
+          listing.release.title
+        }`,
         format: listing.release.format,
         description: listing.release.description,
         imageUrl: listing.release.images[0].uri,
@@ -132,6 +149,24 @@ exports.sourceNodes = async ({
     },
   })
 
+  const bands = await fetchCMSBands()
+  bands.map(({ id, name, description, url, image }) => ({
+    id,
+    name,
+    description,
+    url,
+    imageUrl: image.data?.attributes.formats.small.url,
+  })).forEach((band) => {
+    createNode({
+      ...band,
+      id: createNodeId(`Band-${band.id}`),
+      internal: {
+        type: 'Band',
+        contentDigest: createContentDigest(band),
+      },
+    })
+  })
+
   console.log(`-- DISCOGS PLUGIN -- All done`)
 }
 
@@ -145,6 +180,20 @@ exports.onCreateNode = async ({
   if (node.internal.type === 'Listing') {
     const fileNode = await createRemoteFileNode({
       url: node.release.imageUrl,
+      parentNodeId: node.id,
+      createNode,
+      createNodeId,
+      cache,
+      store,
+    })
+    if (fileNode) {
+      createNodeField({ node, name: 'localImage', value: fileNode.id })
+    }
+  }
+
+  if (node.internal.type === 'Band' && node.imageUrl) {
+    const fileNode = await createRemoteFileNode({
+      url: node.imageUrl,
       parentNodeId: node.id,
       createNode,
       createNodeId,
@@ -170,6 +219,10 @@ exports.createSchemaCustomization = ({ actions }) => {
     
     type Mood implements Node {
       value: String!
+    }
+    
+    type Band implements Node {
+      localImage: File @link(from: "fields.localImage")
     }
   `)
 }
@@ -233,12 +286,23 @@ async function fetchCMSListings() {
   return filtered
 }
 
+async function fetchCMSBands() {
+  const allPages = (await fetchAllPages(fetchCMSPage('bands')))
+    .map(({ data }) => data)
+    .flat()
+    .map((band) => ({ id: band.id, ...band.attributes }))
+
+  console.log(`-- DISCOGS PLUGIN -- Fetched ${allPages.length} bands from CMS`)
+
+  return allPages
+}
+
 async function fetchCMSSingleTypes() {
   const introText = await fetchCMSPage('intro-text-content')()
   return {
     introText: introText.error
-      ? 'Replace this using the Introduction Text field of the CMS. (Don\'t forget to publish !)'
-      : DOMPurify.sanitize(markdownConverter.makeHtml(introText.data.attributes.content)),
+      ? "Replace this using the Introduction Text field of the CMS. (Don't forget to publish !)"
+      : parseMarkdown(introText.data.attributes.content),
   }
 }
 
@@ -320,3 +384,6 @@ function performRequest(options, responseParser, ssl = true) {
     req.end()
   })
 }
+
+const parseMarkdown = (markdown) =>
+  DOMPurify.sanitize(markdownConverter.makeHtml(markdown))
