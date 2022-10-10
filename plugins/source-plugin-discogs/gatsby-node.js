@@ -2,6 +2,8 @@ const https = require('https')
 const http = require('http')
 const qs = require('qs')
 const uniq = require('lodash/uniq')
+const showdown = require('showdown'),
+  markdownConverter = new showdown.Converter()
 
 const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
@@ -18,6 +20,7 @@ const {
 // Improve the preprocessing with https://www.gatsbyjs.com/docs/how-to/images-and-media/preprocessing-external-images/ TODO
 // For some reason the primary image in the array is not as good as the one on the discogs page of the release TODO
 // Check the robustness of the build in case of request failures TODO
+// Split CMS and Discogs in separate plugins TODO
 exports.sourceNodes = async ({
   actions: { createNode },
   createContentDigest,
@@ -35,7 +38,7 @@ exports.sourceNodes = async ({
     )
   }
 
-  console.log('-- DISCOGS PLUGIN -- Starting')
+  console.log('-- DISCOGS AND CMS PLUGIN -- Starting')
 
   const listingsFromDiscogs = (await fetchDiscogsListings()).filter(
     ({ release }) => Boolean(release.images[0]?.uri)
@@ -56,7 +59,7 @@ exports.sourceNodes = async ({
       return {
         ...matchingDiscogsListing,
         moods: moods.map((mood) => mood.attributes.name),
-        note,
+        note: markdownConverter.makeHtml(note),
       }
     }
   )
@@ -116,6 +119,16 @@ exports.sourceNodes = async ({
         contentDigest: createContentDigest(mood),
       },
     })
+  })
+
+  const { introText } = await fetchCMSSingleTypes()
+  createNode({
+    content: introText,
+    id: createNodeId(`IntroText`),
+    internal: {
+      type: 'IntroText',
+      contentDigest: createContentDigest(introText),
+    },
   })
 
   console.log(`-- DISCOGS PLUGIN -- All done`)
@@ -211,15 +224,26 @@ async function fetchCMSListings() {
   )
 
   console.log(
-    `-- DISCOGS PLUGIN -- Fetched ${allPages.length} listings from CMS (${allPages.length - filtered.length} filtered out)`
+    `-- DISCOGS PLUGIN -- Fetched ${allPages.length} listings from CMS (${
+      allPages.length - filtered.length
+    } filtered out)`
   )
 
   return filtered
 }
 
+async function fetchCMSSingleTypes() {
+  const introText = await fetchCMSPage('intro-text-content')()
+  return {
+    introText: introText.error
+      ? 'Replace this using the Introduction Text field of the CMS. (Don\'t forget to publish !)'
+      : markdownConverter.makeHtml(introText.data.attributes.content),
+  }
+}
+
 const fetchCMSPage =
   (endpoint, params = {}) =>
-  (page) => {
+  (page = 1) => {
     const query = qs.stringify(
       {
         pagination: {
@@ -240,9 +264,12 @@ const fetchCMSPage =
       port: CMS_PORT,
       path: `/api/${endpoint}?${query}`,
       method: 'GET',
-      headers: process.env.NODE_ENV !== 'development' ? {
-        Authorization: `bearer ${CMS_API_TOKEN}`,
-      } : {},
+      headers:
+        process.env.NODE_ENV !== 'development'
+          ? {
+              Authorization: `bearer ${CMS_API_TOKEN}`,
+            }
+          : {},
     }
 
     return performRequest(
@@ -252,7 +279,7 @@ const fetchCMSPage =
 
         return {
           ...responseFromJSON,
-          numPages: responseFromJSON.meta.pagination.pageCount,
+          numPages: responseFromJSON.meta?.pagination?.pageCount,
         }
       },
       process.env.NODE_ENV !== 'development'
@@ -260,7 +287,7 @@ const fetchCMSPage =
   }
 
 async function fetchAllPages(fetchOnePage) {
-  const firstPage = await fetchOnePage()
+  const firstPage = await fetchOnePage(1)
 
   const extraPagePromises = []
   for (let i = 2; i <= firstPage.numPages; i++) {

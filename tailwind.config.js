@@ -10,6 +10,9 @@ module.exports = {
       },
       height: {
         '50vw': '50vw'
+      },
+      width: {
+        '450px': '450px'
       }
     },
     fontFamily: {
@@ -18,6 +21,7 @@ module.exports = {
     colors: {
       black: '#111111',
       white: colors.white,
+      gray: colors.neutral
     }
   },
   variants: {

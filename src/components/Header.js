@@ -1,56 +1,70 @@
 import * as React from 'react'
-import { useState } from 'react'
-import { Link } from 'gatsby'
+import { useMemo, useState } from 'react'
+import { graphql, Link, useStaticQuery } from 'gatsby'
 import { StaticImage } from 'gatsby-plugin-image'
+import * as DOMPurify from 'dompurify'
 
-const ContentDrawer = ({ title, children, style }) => {
+const ContentDrawer = ({ title, children, className }) => {
   const [showContent, setShowContent] = useState(true)
 
   return (
-    <li className={`${style || ''}`}>
+    <li className={`${className || ''}`}>
       {/*<button onClick={() => setShowContent(!showContent)} className="w-full">*/}
-      <h1 className="mt-6 block py-2.5 pl-2 text-3xl">{title}</h1>
+      <h1 className="mt-6 block py-2.5 pl-2 text-center text-3xl text-white sm:mt-0">
+        {title}
+      </h1>
       {/*</button>*/}
       {showContent && children}
     </li>
   )
 }
 
-const Header = ({}) => {
+const Header = () => {
+  const data = useStaticQuery(graphql`
+    {
+      allIntroText {
+        nodes {
+          content
+        }
+      }
+    }
+  `)
+
+  const introTextHTML = useMemo(
+    () => data.allIntroText.nodes[0].content,
+    [data]
+  )
+
   return (
     <header>
       <nav>
-        <div className="rounded-b-full bg-white sm:mt-10 sm:bg-black">
-          <Link to="/" className="flex place-content-center">
-            {/*Import image via a component so the build fails if not found / Or use URL ? TODO*/}
-            <StaticImage
-              src="../images/ajna-records-logo-500x500.svg"
-              alt="Ajna Records"
-              width={200}
-              height={200}
-              placeholder="tracedSVG"
-              className="sm:rounded-full sm:bg-white sm:border-white sm:border-8"
-            />
-          </Link>
+        <div className="flex place-content-center rounded-b-full bg-white sm:mt-10 sm:bg-black">
+            <Link to="/">
+              {/*Import image via a component so the build fails if not found / Or use URL ? TODO*/}
+              <StaticImage
+                src="../images/ajna-records-logo-500x500.svg"
+                alt="Ajna Records"
+                width={200}
+                height={200}
+                placeholder="tracedSVG"
+                className="sm:rounded-full sm:border-8 sm:border-white sm:bg-white"
+              />
+            </Link>
         </div>
       </nav>
 
-      <ul className="sm:bg-gray-400 flex w-full flex-col p-4 sm:justify-center sm:gap-10">
-        <p className="bg-black p-6 text-white">
-          AJNA RECORDS is a record label and distro based in Nantes, France.
-          Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur.
-        </p>
-        {/*<ContentDrawer title="CONTACT" style="bg-black text-white">*/}
+      <ul className="flex w-full flex-col p-4 sm:justify-center">
+        <p
+          className="bg-black p-6 text-center text-white"
+          dangerouslySetInnerHTML={{
+            __html: DOMPurify.sanitize(introTextHTML),
+          }}
+        ></p>
+        {/*<ContentDrawer title="Contact">*/}
         {/*  <p>*/}
         {/*    Duis aute irure dolor in reprehenderit in voluptate velit esse*/}
         {/*    cillum dolore eu fugiat nulla pariatur.*/}
         {/*  </p>*/}
-        {/*</ContentDrawer>*/}
-        {/*<ContentDrawer title="BANDS" style="bg-black text-white mb-6">*/}
-        {/*  <p>Meshuggah</p>*/}
-        {/*  <p>Pomme</p>*/}
-        {/*  <p>Djépludidée D'Nomdgroupe</p>*/}
         {/*</ContentDrawer>*/}
       </ul>
     </header>
