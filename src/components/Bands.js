@@ -33,7 +33,7 @@ const Bands = () => {
     <section
       className={classNames(
         'mx-auto',
-        'rounded-3xl',
+        'rounded-lg',
         'flex flex-col justify-center',
         'bg-gray-50 mb-10 shadow-inner'
       )}

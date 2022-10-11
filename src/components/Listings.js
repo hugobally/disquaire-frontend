@@ -54,7 +54,7 @@ const Listings = () => {
 
   return (
     <>
-      <div className="bg-gray-50 shadow-inner rounded-3xl sm:pb-10">
+      <div className="bg-gray-50 shadow-inner rounded-lg sm:pb-10">
         <div
           className="w-full p-2 pt-14 text-center text-5xl
                         sm:h-auto sm:px-10"

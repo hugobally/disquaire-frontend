@@ -71,7 +71,7 @@ const Header = (factory, deps) => {
           </Link>
         </div>
       </nav>
-      <header className="mt-5 mb-10 flex w-full flex-col items-center justify-center rounded-3xl bg-opacity-0 p-10 shadow-none sm:bg-gray-50 sm:shadow-inner">
+      <header className="mt-5 mb-10 flex w-full flex-col items-center justify-center rounded-lg bg-opacity-0 p-10 shadow-none sm:bg-gray-50 sm:shadow-inner">
         <div
           className="prose text-center text-2xl"
           dangerouslySetInnerHTML={{
