@@ -230,6 +230,7 @@ exports.createSchemaCustomization = ({ actions }) => {
     
     type Band implements Node {
       localImage: File @link(from: "fields.localImage")
+      url: String
     }
   `)
 }
