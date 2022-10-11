@@ -327,7 +327,7 @@ async function fetchCMSSingleTypes() {
   const introTextResponse = await fetchCMSPage('intro-text-content')()
   const shippingInfoResponse = await fetchCMSPage('shipping-info')()
   const contactURLResponse = await fetchCMSPage('contact-url')()
-  const contactURLArray = Object.keys(
+  const contactURLArray = contactURLResponse.error ? [] : Object.keys(
     omit(contactURLResponse.data.attributes, 'createdAt', 'updatedAt')
   ).map((key) => ({ name: key, url: contactURLResponse.data.attributes[key] }))
   console.log(contactURLArray)
@@ -339,7 +339,7 @@ async function fetchCMSSingleTypes() {
     shippingInfo: shippingInfoResponse.error
       ? "Replace this using the Introduction Text field of the CMS. (Don't forget to publish !)"
       : parseMarkdown(shippingInfoResponse.data.attributes.content),
-    contactURLArray: contactURLResponse.error ? [] : contactURLArray,
+    contactURLArray,
   }
 }
 
