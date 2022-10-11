@@ -10,7 +10,6 @@ const Bands = () => {
         nodes {
           id
           name
-          description
           url
           localImage {
             childImageSharp {
@@ -33,24 +32,23 @@ const Bands = () => {
   return (
     <section
       className={classNames(
-        'mx-auto p-2',
+        'mx-auto',
         'rounded-3xl',
         'flex flex-col justify-center',
         'bg-gray-50 mb-10 shadow-inner'
       )}
     >
-      <h1 className="p-2 text-center text-5xl uppercase sm:h-auto sm:px-10">
+      <h1 className="p-2 pt-14 text-center text-5xl uppercase sm:h-auto sm:px-10">
         Bands
       </h1>
       <ul
         className={classNames(
           'gap-2 p-10 sm:gap-4',
-          'sm:place-items-center',
-          'sm:grid sm:grid-flow-row-dense sm:auto-rows-fr sm:auto-rows-auto',
-          'sm:grid-cols-auto-fit'
+          'sm:place-items-center justify-center',
+          'grid sm:grid-flow-row-dense sm:auto-rows-fr sm:auto-rows-auto sm:grid-cols-auto-fit'
         )}
       >
-        {bands.map(({ id, name, description, url, localImage }) => {
+        {bands.map(({ id, name, url, localImage }) => {
           const image = getImage(localImage)
 
           return (
@@ -59,7 +57,7 @@ const Bands = () => {
                 to={url}
                 className="hover:bg-white hover:bg-opacity-10"
               >
-                {image && (
+                {image ? (
                   <div style={{ display: 'grid' }}>
                     <GatsbyImage
                       image={image}
@@ -68,7 +66,6 @@ const Bands = () => {
                         gridArea: '1/1',
                       }}
                       layout="constrained"
-                      aspectRatio={1}
                       className="rounded-lg shadow-md"
                     />
                     <div
@@ -79,10 +76,10 @@ const Bands = () => {
                         display: 'grid',
                       }}
                     >
-                      <span className="text-3xl bg-white p-1">{name}</span>
+                      <span className="text-3xl bg-white p-1 rounded-sm shadow">{name}</span>
                     </div>
                   </div>
-                )}
+                ) : <span className="text-3xl p-1">{name}</span>}
               </Link>
             </li>
           )

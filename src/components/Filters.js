@@ -2,6 +2,7 @@ import * as React from 'react'
 import { useMemo, useState } from 'react'
 import classNames from 'classnames'
 import { without } from 'lodash'
+import { StaticImage } from "gatsby-plugin-image";
 
 export const FORMATS = {
   vinyl: { title: 'Vinyl', matchers: [] }, // By default, if we don't match another format, it's a vinyl.
@@ -43,11 +44,9 @@ const Filters = ({
   return (
     <div
       className={classNames(
-        'top-2 z-10 m-3 sm:mx-10 sm:mt-8 sm:w-auto sm:p-2',
-        {
-          sticky: !mobileModal,
-          'fixed overflow-scroll overscroll-contain': mobileModal,
-        }
+        'top-2 z-10 mx-3 mt-8 sm:mx-10 sm:w-auto sm:p-2',
+        'sticky overflow-scroll overscroll-contain sm:overflow-hidden',
+        'rounded-lg bg-white shadow-inner sm:bg-opacity-0 sm:shadow-none'
       )}
     >
       <div
@@ -112,7 +111,7 @@ const Filter = ({
   return (
     <div
       className={classNames(
-        `flex-1 rounded-lg bg-black text-base sm:bg-white sm:shadow-inner sm:text-lg`,
+        `flex-1 text-lg sm:rounded-lg sm:bg-white sm:shadow-inner`,
         {
           'sr-only': mobileModal && filterName !== mobileModal,
         }
@@ -120,10 +119,14 @@ const Filter = ({
     >
       <div className="flex flex-col sm:m-1 sm:flex-row">
         <legend
-          className="relative rounded-sm p-2 text-white  sm:sr-only sm:text-black"
+          className="relative flex justify-between p-2 sm:sr-only sm:rounded-sm"
           style={{ fontFamily: 'Oswald' }} // TODO Remove this somehow
         >
           {legend}
+          <StaticImage
+            src="../images/arrow-down-svgrepo-com.svg"
+            alt=""
+          />
           <button
             onClick={() => {
               setMobileModal(mobileModal === filterName ? null : filterName)
@@ -145,13 +148,10 @@ const Filter = ({
               currentValue === value || (value === 'all' && !currentValue)
 
             return (
-              <div
-                key={value}
-                className="bg-black text-white sm:bg-white sm:text-black"
-              >
+              <div key={value}>
                 <button
                   className={classNames(
-                    'rounded-md p-2 lowercase',
+                    'p-2 lowercase sm:rounded-md',
                     'sm:transition-colors sm:hover:bg-black sm:hover:text-white',
                     'disabled:opacity-50',
                     {

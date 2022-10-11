@@ -41,7 +41,7 @@ const Header = () => {
       <nav>
         <div
           className={classNames(
-            'flex place-content-center rounded-b-full',
+            'flex place-content-center rounded-b-full'
             // 'bg-white sm:mt-10 sm:bg-black'
           )}
         >
@@ -58,13 +58,13 @@ const Header = () => {
           </Link>
         </div>
       </nav>
-      <header className="flex w-full flex-col mt-5 mb-10 p-10 sm:justify-center rounded-3xl shadow">
-        <p
-          className="text-center text-3xl"
+      <header className="w-full flex justify-center mt-5 mb-10 rounded-3xl bg-opacity-0 p-10 shadow-none sm:justify-center sm:bg-gray-50 sm:shadow-inner">
+        <div
+          className="prose text-2xl text-center"
           dangerouslySetInnerHTML={{
             __html: introTextHTML,
           }}
-        ></p>
+        />
       </header>
     </>
   )

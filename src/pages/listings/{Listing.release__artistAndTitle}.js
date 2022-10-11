@@ -1,8 +1,9 @@
 import * as React from 'react'
-import { graphql } from 'gatsby'
+import { graphql, Link } from "gatsby";
 import Page from 'src/components/Page'
 import { GatsbyImage, getImage } from 'gatsby-plugin-image'
-import {useEffect, useRef} from "react";
+import { useEffect, useRef } from 'react'
+import classNames from "classnames";
 
 const Listing = ({ data }) => {
   const { localImage, release, note, seller, price } = data.listing
@@ -16,15 +17,18 @@ const Listing = ({ data }) => {
 
   return (
     <Page>
-      <div className="bg-white rounded-t-2xl min-h-screen" ref={listingRef}>
+      <div className="min-h-screen rounded-t-2xl bg-white" ref={listingRef}>
         <div className="flex flex-col xl:flex-row">
+          <Link to="/" className={classNames('whitespace-nowrap mx-auto mt-4 sm:mt-10 text-3xl')}>
+            {"< Back"}
+          </Link>
           <div className="flex justify-center p-10 xl:w-1/2 xl:justify-end xl:p-20">
             <div>
               <GatsbyImage
-                  image={image}
-                  alt={`${release.artist} ${release.description}`}
-                  width={450}
-                  height={450}
+                image={image}
+                alt={`${release.artist} ${release.description}`}
+                width={450}
+                height={450}
               />
             </div>
           </div>
@@ -33,40 +37,13 @@ const Listing = ({ data }) => {
             <h3>{release.artist}</h3>
             <span>Price: {price.value} €</span>
             <span>Format: {release.format}</span>
-            <p>{seller.shipping}</p>
-            <p>{seller.payment}</p>
+            <div dangerouslySetInnerHTML={{ __html: data.allShippingInfo.nodes[0].content }} ></div>
           </div>
         </div>
       </div>
     </Page>
   )
 }
-
-// <table>
-//   <tbody>
-//   <tr>
-//     <td>Price</td>
-//     <td>{price.value} €</td>
-//   </tr>
-//   <tr>
-//     <td>Format</td>
-//     <td>{release.format}</td>
-//   </tr>
-//   </tbody>
-// </table>
-
-// Structure for full height page
-//
-//   <div className="flex flex-row h-full">
-//     <div className="w-1/2 flex">
-//       <div className="flex">
-//         ...
-//       </div>
-//     </div>
-//     <main className="w-1/2 flex">
-//       ...
-//     </main>
-//   </div>
 
 export const query = graphql`
   query ($id: String) {
@@ -99,6 +76,12 @@ export const query = graphql`
       seller {
         shipping
         payment
+      }
+    }
+
+    allShippingInfo {
+      nodes {
+        content
       }
     }
   }

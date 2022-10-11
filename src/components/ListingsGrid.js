@@ -26,7 +26,7 @@ const ListingsGrid = ({ listings }) => {
         }
 
         interval = interval - 1
-        return listingsWithoutNotes.shift() || listingsWithoutNotes.shift()
+        return listingsWithoutNotes.shift() || listingsWithNotes.shift()
       })
 
     orderedListings.unshift(firstListing || listingsWithoutNotes[0])

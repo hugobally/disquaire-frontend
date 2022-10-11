@@ -139,7 +139,7 @@ exports.sourceNodes = async ({
     })
   })
 
-  const { introText } = await fetchCMSSingleTypes()
+  const { introText, shippingInfo } = await fetchCMSSingleTypes()
   createNode({
     content: introText,
     id: createNodeId(`IntroText`),
@@ -148,12 +148,19 @@ exports.sourceNodes = async ({
       contentDigest: createContentDigest(introText),
     },
   })
+  createNode({
+    content: shippingInfo,
+    id: createNodeId(`ShippingInfo`),
+    internal: {
+      type: 'ShippingInfo',
+      contentDigest: createContentDigest(shippingInfo),
+    },
+  })
 
   const bands = await fetchCMSBands()
-  bands.map(({ id, name, description, url, image }) => ({
+  bands.map(({ id, name, url, image }) => ({
     id,
     name,
-    description,
     url,
     imageUrl: image.data?.attributes.formats.small.url,
   })).forEach((band) => {
@@ -299,10 +306,16 @@ async function fetchCMSBands() {
 
 async function fetchCMSSingleTypes() {
   const introText = await fetchCMSPage('intro-text-content')()
+  const shippingInfo = await fetchCMSPage('shipping-info')()
+  // const contactURL = await fetchCMSPage('contact-url')()
+
   return {
     introText: introText.error
       ? "Replace this using the Introduction Text field of the CMS. (Don't forget to publish !)"
       : parseMarkdown(introText.data.attributes.content),
+    shippingInfo: shippingInfo.error
+      ? "Replace this using the Introduction Text field of the CMS. (Don't forget to publish !)"
+      : parseMarkdown(shippingInfo.data.attributes.content),
   }
 }
 

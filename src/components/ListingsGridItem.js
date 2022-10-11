@@ -16,39 +16,48 @@ const ListingsGridItem = ({ listing, image }) => {
           : ''
       } `}
     >
-      <div className={classNames('relative flex flex-col')}>
+      <div>
         <Link
           to={`${listingPath}?from_grid=true`}
+          className={classNames('relative flex flex-col')}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
           <GatsbyImage
             image={image}
             alt={`${release.artist} ${release.description}`}
-            className="rounded-md"
+            className="sm:rounded-md"
           />
+          <span
+            className={classNames(
+              'sm:absolute',
+              'bg-black text-white',
+              'bottom-0 w-full p-2 transition-opacity',
+              {
+                'sm:invisible sm:opacity-0 ': !isHovered,
+                'sm:visible sm:opacity-100': isHovered,
+                'rounded-b-md': !note,
+                'rounded-none sm:rounded-b-md': note,
+              }
+            )}
+          >
+            {`${release.artist} - ${release.title}`}
+          </span>
         </Link>
-        <span
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          className={classNames(
-            'sm:absolute',
-            'bg-black text-white',
-            'bottom-0 w-full rounded-b-md p-2 transition-opacity',
-            {
-              // 'w-450px': note,
-              'sm:invisible sm:opacity-0 ': !isHovered,
-              'sm:visible sm:opacity-100': isHovered,
-            }
-          )}
-        >
-          {`${release.artist} - ${release.title}`}
-        </span>
       </div>
       {note && (
-        <Link to={`${listingPath}?from_grid=true`}>
-          <span
-            className="sm:absolute sm:top-0 sm:z-20 sm:w-1/2 sm:rotate-3 sm:transform sm:rounded sm:bg-black sm:bg-opacity-95 sm:p-3 sm:text-white sm:shadow-2xl sm:text-md"
+        <Link
+          to={`${listingPath}?from_grid=true`}
+          className={classNames('rounded-b-lg bg-black sm:rounded-b-none')}
+        >
+          <div
+            className={classNames(
+              'text-white',
+              'p-3 sm:p-3',
+              'sm:absolute sm:top-0 sm:text-base',
+              'sm:z-20 sm:w-1/2 sm:rotate-3 sm:transform sm:rounded',
+              'sm:bg-black sm:bg-opacity-95 sm:shadow-2xl'
+            )}
             dangerouslySetInnerHTML={{ __html: note }}
           />
         </Link>
@@ -56,27 +65,5 @@ const ListingsGridItem = ({ listing, image }) => {
     </article>
   )
 }
-
-// <div className="absolute top-0 grid w-60 rotate-3 shadow-lg">
-//   <StaticImage
-//     src="../images/old-yellowed-crinkled-paper-texture.jpg"
-//     alt="Post-it note background"
-//     style={{ gridArea: '1/1', height: 200, width: 200 }}
-//   ></StaticImage>
-//   <div
-//     className=""
-//     style={{
-//       // By using the same grid area for both, they are stacked on top of each other
-//       gridArea: '1/1',
-//       position: 'relative',
-//       // This centers the other elements inside the hero component
-//       placeItems: 'center',
-//       display: 'grid',
-//         //
-//         fontFamily: 'Homemade Apple'
-//     }}
-//   >
-//     {note}
-//   </div>
 
 export default ListingsGridItem
