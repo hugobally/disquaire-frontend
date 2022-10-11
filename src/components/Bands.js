@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { graphql, Link, useStaticQuery } from 'gatsby'
-import { GatsbyImage, getImage } from 'gatsby-plugin-image'
+import { GatsbyImage, getImage, StaticImage } from "gatsby-plugin-image";
 import classNames from 'classnames'
 
 const Bands = () => {
@@ -27,6 +27,8 @@ const Bands = () => {
   `)
 
   const bands = useMemo(() => data.allBand.nodes, [data])
+
+  const images = ['placehold']
 
   // TODO Factorize Grid component
   return (
@@ -57,10 +59,12 @@ const Bands = () => {
                 to={url}
                 className="hover:bg-white hover:bg-opacity-10"
               >
-                {image ? (
+                {image || true ? (
                   <div style={{ display: 'grid' }}>
-                    <GatsbyImage
-                      image={image}
+                    {/*<GatsbyImage*/}
+                    {/*image={image}*/}
+                    <StaticImage
+                      src="../images/placeholder-1.jpg"
                       alt={''}
                       style={{
                         gridArea: '1/1',
