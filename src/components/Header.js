@@ -2,25 +2,22 @@ import * as React from 'react'
 import { useMemo, useState } from 'react'
 import { graphql, Link, useStaticQuery } from 'gatsby'
 import { StaticImage } from 'gatsby-plugin-image'
-import Bands from './Bands'
 import classNames from 'classnames'
+import FacebookSVG from '../images/facebook-icon.svg'
+import InstagramSVG from '../images/instagram-icon.svg'
+import MastodonSVG from '../images/mastodon-icon.svg'
+import BandcampSVG from '../images/bandcamp-icon.svg'
+import EmailSVG from '../images/email-icon.svg'
 
-const ContentDrawer = ({ title, children, className }) => {
-  const [showContent, setShowContent] = useState(true)
-
-  return (
-    <li className={`${className || ''}`}>
-      {/*<button onClick={() => setShowContent(!showContent)} className="w-full">*/}
-      <h1 className="mt-6 block py-2.5 pl-2 text-center text-3xl text-white sm:mt-0">
-        {title}
-      </h1>
-      {/*</button>*/}
-      {showContent && children}
-    </li>
-  )
+const iconSVG = {
+  instagram: InstagramSVG,
+  facebook: FacebookSVG,
+  mastodon: MastodonSVG,
+  bandcamp: BandcampSVG,
+  mail: EmailSVG,
 }
 
-const Header = () => {
+const Header = (factory, deps) => {
   const data = useStaticQuery(graphql`
     {
       allIntroText {
@@ -28,11 +25,27 @@ const Header = () => {
           content
         }
       }
+      allContactUrl {
+        nodes {
+          name
+          url
+        }
+      }
     }
   `)
 
   const introTextHTML = useMemo(
     () => data.allIntroText.nodes[0].content,
+    [data]
+  )
+
+  const links = useMemo(
+    () => {
+      const array = data.allContactUrl.nodes
+      const mail = array.find(({ name, url }) => name === 'mail' && url)
+      const rest = array.filter(({ name, url }) => name !== 'mail' && url)
+      return mail ? [mail, ...rest] : rest
+    },
     [data]
   )
 
@@ -58,15 +71,33 @@ const Header = () => {
           </Link>
         </div>
       </nav>
-      <header className="w-full flex justify-center mt-5 mb-10 rounded-3xl bg-opacity-0 p-10 shadow-none sm:justify-center sm:bg-gray-50 sm:shadow-inner">
+      <header className="mt-5 mb-10 flex w-full flex-col items-center justify-center rounded-3xl bg-opacity-0 p-10 shadow-none sm:bg-gray-50 sm:shadow-inner">
         <div
-          className="prose text-2xl text-center"
+          className="prose text-center text-2xl"
           dangerouslySetInnerHTML={{
             __html: introTextHTML,
           }}
         />
-        <address>
-
+        <address className={classNames('mt-10 flex gap-3')}>
+          {links.map(({ name, url }) => (
+            <Link
+              to={
+                name === 'mail'
+                  ? `mailto:${url}`
+                  : !url.includes('https')
+                  ? `https://${url}`
+                  : url
+              }
+            >
+              <div className={classNames('transition hover:scale-110 p-2')}>
+                <img
+                  className={classNames('w-10 ')}
+                  src={iconSVG[name]}
+                  alt={name}
+                />
+              </div>
+            </Link>
+          ))}
         </address>
       </header>
     </>

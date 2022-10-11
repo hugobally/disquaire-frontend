@@ -10,6 +10,7 @@ const { createRemoteFileNode } = require('gatsby-source-filesystem')
 
 const uniq = require('lodash/uniq')
 const { uniqBy } = require('lodash')
+const { omit } = require('lodash/object')
 
 const {
   DISCOGS_KEY,
@@ -139,7 +140,7 @@ exports.sourceNodes = async ({
     })
   })
 
-  const { introText, shippingInfo } = await fetchCMSSingleTypes()
+  const { introText, shippingInfo, contactURLArray } = await fetchCMSSingleTypes()
   createNode({
     content: introText,
     id: createNodeId(`IntroText`),
@@ -156,23 +157,35 @@ exports.sourceNodes = async ({
       contentDigest: createContentDigest(shippingInfo),
     },
   })
-
-  const bands = await fetchCMSBands()
-  bands.map(({ id, name, url, image }) => ({
-    id,
-    name,
-    url,
-    imageUrl: image.data?.attributes.formats.small.url,
-  })).forEach((band) => {
+  contactURLArray.forEach((contactURL) =>
     createNode({
-      ...band,
-      id: createNodeId(`Band-${band.id}`),
+      ...contactURL,
+      id: createNodeId(`ContactUrl-${contactURL.name}`),
       internal: {
-        type: 'Band',
-        contentDigest: createContentDigest(band),
+        type: 'ContactUrl',
+        contentDigest: createContentDigest(contactURL),
       },
     })
-  })
+  )
+
+  const bands = await fetchCMSBands()
+  bands
+    .map(({ id, name, url, image }) => ({
+      id,
+      name,
+      url,
+      imageUrl: image.data?.attributes.formats.small.url,
+    }))
+    .forEach((band) => {
+      createNode({
+        ...band,
+        id: createNodeId(`Band-${band.id}`),
+        internal: {
+          type: 'Band',
+          contentDigest: createContentDigest(band),
+        },
+      })
+    })
 
   console.log(`-- DISCOGS PLUGIN -- All done`)
 }
@@ -230,6 +243,11 @@ exports.createSchemaCustomization = ({ actions }) => {
     
     type Band implements Node {
       localImage: File @link(from: "fields.localImage")
+      url: String
+    }
+    
+    type ContactUrl implements Node {
+      name: String
       url: String
     }
   `)
@@ -306,17 +324,22 @@ async function fetchCMSBands() {
 }
 
 async function fetchCMSSingleTypes() {
-  const introText = await fetchCMSPage('intro-text-content')()
-  const shippingInfo = await fetchCMSPage('shipping-info')()
-  // const contactURL = await fetchCMSPage('contact-url')()
+  const introTextResponse = await fetchCMSPage('intro-text-content')()
+  const shippingInfoResponse = await fetchCMSPage('shipping-info')()
+  const contactURLResponse = await fetchCMSPage('contact-url')()
+  const contactURLArray = Object.keys(
+    omit(contactURLResponse.data.attributes, 'createdAt', 'updatedAt')
+  ).map((key) => ({ name: key, url: contactURLResponse.data.attributes[key] }))
+  console.log(contactURLArray)
 
   return {
-    introText: introText.error
+    introText: introTextResponse.error
       ? "Replace this using the Introduction Text field of the CMS. (Don't forget to publish !)"
-      : parseMarkdown(introText.data.attributes.content),
-    shippingInfo: shippingInfo.error
+      : parseMarkdown(introTextResponse.data.attributes.content),
+    shippingInfo: shippingInfoResponse.error
       ? "Replace this using the Introduction Text field of the CMS. (Don't forget to publish !)"
-      : parseMarkdown(shippingInfo.data.attributes.content),
+      : parseMarkdown(shippingInfoResponse.data.attributes.content),
+    contactURLArray: contactURLResponse.error ? [] : contactURLArray,
   }
 }
 
