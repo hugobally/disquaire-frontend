@@ -174,7 +174,7 @@ exports.sourceNodes = async ({
       id,
       name,
       url,
-      imageUrl: image.data?.attributes.formats.small.url,
+      imageUrl: image.data?.attributes.formats.small?.url || image.data?.attributes.formats.thumbnail?.url,
     }))
     .forEach((band) => {
       createNode({

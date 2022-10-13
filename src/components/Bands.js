@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { graphql, Link, useStaticQuery } from 'gatsby'
-import { GatsbyImage, getImage, StaticImage } from "gatsby-plugin-image";
+import { GatsbyImage, getImage } from 'gatsby-plugin-image'
 import classNames from 'classnames'
 
 const Bands = () => {
@@ -28,8 +28,6 @@ const Bands = () => {
 
   const bands = useMemo(() => data.allBand.nodes, [data])
 
-  const images = ['placehold']
-
   // TODO Factorize Grid component
   return (
     <section
@@ -37,7 +35,7 @@ const Bands = () => {
         'mx-auto',
         'rounded-lg',
         'flex flex-col justify-center',
-        'bg-gray-50 mb-10 shadow-inner'
+        'mb-10 bg-gray-50 shadow-inner'
       )}
     >
       <h1 className="p-2 pt-14 text-center text-5xl uppercase sm:h-auto sm:px-10">
@@ -46,7 +44,7 @@ const Bands = () => {
       <ul
         className={classNames(
           'gap-2 p-10 sm:gap-4',
-          'sm:place-items-center justify-center',
+          'justify-center sm:place-items-center',
           'grid sm:grid-flow-row-dense sm:auto-rows-fr sm:auto-rows-auto sm:grid-cols-auto-fit'
         )}
       >
@@ -54,23 +52,18 @@ const Bands = () => {
           const image = getImage(localImage)
 
           return (
-            <li key={id} className="w-48 sm:hover:scale-110 sm:transition">
-              <Link
-                to={url}
-                className="hover:bg-white hover:bg-opacity-10"
-              >
+            <li key={id} className="w-48 sm:transition sm:hover:scale-110">
+              <Link to={url} className="hover:bg-white hover:bg-opacity-10">
                 {image || true ? (
                   <div style={{ display: 'grid' }}>
-                    {/*<GatsbyImage*/}
-                    {/*image={image}*/}
-                    <StaticImage
-                      src="../images/placeholder-1.jpg"
-                      alt={''}
+                    <GatsbyImage
+                      image={image}
                       style={{
                         gridArea: '1/1',
                       }}
                       layout="constrained"
                       className="rounded-lg shadow-md"
+                      alt={''}
                     />
                     <div
                       style={{
@@ -80,10 +73,14 @@ const Bands = () => {
                         display: 'grid',
                       }}
                     >
-                      <span className="text-3xl bg-white p-1 rounded-sm shadow">{name}</span>
+                      <span className="rounded-sm bg-white p-1 text-3xl shadow">
+                        {name}
+                      </span>
                     </div>
                   </div>
-                ) : <span className="text-3xl p-1">{name}</span>}
+                ) : (
+                  <span className="p-1 text-3xl">{name}</span>
+                )}
               </Link>
             </li>
           )
